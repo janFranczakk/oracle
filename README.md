@@ -41,6 +41,8 @@ oracle/
 
 [Architecture](docs/ARCHITECTURE.md) · [Dataset specification](docs/DATASETS.md) · [Stage 1 report](STAGE_1_REPORT.md) · [Stage 2 report](STAGE_2_REPORT.md)
 
+Contributor rules: [AGENTS.md](AGENTS.md) · [Git and review workflow](docs/REPOSITORY_WORKFLOW.md). Substantial changes use separate branches and Pull Requests into `main`. GitHub Actions checks the backend on Linux / Windows and the frontend tests, lint, formatting and production build.
+
 ## Physics engine
 
 Pymunk 7.2 wraps the established Chipmunk rigid-body engine and integrates directly with Python. A single-threaded Space, fixed `1/120 s` timestep, deterministic object insertion and local seeded RNG provide reproducible tests. Circles and rectangles cover spheres, blocks, ramps, walls and platforms. Ramp angles are rectangle rotations.
