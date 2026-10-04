@@ -1,0 +1,797 @@
+/* Dataset instrumentation extends the shared ORACLE tokens. */
+.research-page:has(.dataset-explorer) {
+  padding: 0 var(--s-2) var(--s-4);
+}
+.research-page:has(.dataset-explorer) .research-subnav {
+  margin-bottom: var(--s-4);
+}
+.episode-ranges summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 7px;
+  padding: var(--s-2) 0;
+}
+.episode-ranges[open] summary {
+  color: var(--cyan);
+}
+.research-subnav {
+  display: flex;
+  gap: var(--s-6);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--s-6);
+}
+.research-subnav button {
+  height: 34px;
+  font-size: 11px;
+  padding: 0 var(--s-2);
+  color: var(--dim);
+  border-bottom: 1px solid transparent;
+}
+.research-subnav button.selected {
+  color: var(--cyan);
+  border-color: var(--cyan);
+}
+.research-subnav .tag {
+  font-size: 6px;
+}
+.dataset-explorer {
+  max-width: 1760px;
+  margin: auto;
+  padding-bottom: var(--s-5);
+}
+.dataset-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-6);
+  margin-bottom: var(--s-3);
+}
+.dataset-intro h1 {
+  font-weight: 450;
+  letter-spacing: -1px;
+  font-size: clamp(25px, 1.9vw, 34px);
+  margin: var(--s-1) 0 var(--s-1);
+}
+.dataset-intro p {
+  font-size: 11px;
+  color: var(--muted);
+}
+.collection-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  padding: var(--s-2) var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+}
+.collection-bar label,
+.dataset-catalog-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  color: var(--dim);
+  font: 7px var(--mono);
+  letter-spacing: 1px;
+}
+.collection-bar input,
+.collection-bar select,
+.dataset-catalog-bar select,
+.suite-filter {
+  height: 28px;
+  padding: 0 var(--s-3);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font: 10px var(--mono);
+}
+.collection-bar input {
+  width: 100px;
+}
+.collection-bar select {
+  min-width: 160px;
+}
+.collection-bar label:nth-child(3) select {
+  min-width: 120px;
+}
+.collection-bar .button {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.collection-frequency {
+  font: 7px var(--mono);
+  color: var(--dim);
+  line-height: 2;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.collection-frequency strong {
+  color: var(--muted);
+  font-weight: 400;
+}
+.dataset-error {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--red);
+  border-radius: var(--r-md);
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin-top: var(--s-4);
+  font-size: 11px;
+}
+.collection-progress {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: var(--s-4);
+  border-radius: var(--r-md);
+  margin-top: var(--s-4);
+}
+.collection-progress > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  font: 10px var(--mono);
+  color: var(--muted);
+}
+.collection-progress > div[role='progressbar'] {
+  height: 3px;
+  background: var(--line);
+  margin: var(--s-2) 0;
+  overflow: hidden;
+  border-radius: var(--r-sm);
+}
+.collection-progress > div[role='progressbar'] span {
+  display: block;
+  height: 100%;
+  background: var(--cyan);
+  transition: width var(--motion-smooth);
+}
+.collection-progress p {
+  color: var(--dim);
+  font-size: 10px;
+}
+.dataset-empty {
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--cyan);
+  gap: var(--s-5);
+  padding: var(--s-8);
+}
+.dataset-empty h2 {
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 450;
+  letter-spacing: -0.6px;
+}
+.dataset-empty p {
+  max-width: 480px;
+  color: var(--muted);
+  line-height: 1.9;
+  font-size: 12px;
+}
+.dataset-empty > div {
+  display: flex;
+  gap: var(--s-6);
+  color: var(--dim);
+  font: 9px var(--mono);
+  margin-top: var(--s-4);
+}
+.dataset-catalog-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin: var(--s-3) 0;
+}
+.dataset-catalog-bar label {
+  min-width: 330px;
+}
+.dataset-catalog-bar > button {
+  align-self: flex-end;
+  height: 32px;
+}
+.dataset-catalog-bar > span {
+  margin-left: auto;
+  font: 9px var(--mono);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.dataset-catalog-bar i,
+.episode-observer i {
+  font-style: normal;
+  color: var(--dim);
+}
+.dataset-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4);
+  margin-bottom: var(--s-3);
+}
+.dataset-metrics > div {
+  padding: var(--s-1) var(--s-4);
+  border-left: 1px solid var(--line);
+}
+.dataset-metrics span {
+  font: 7px var(--mono);
+  color: var(--dim);
+  letter-spacing: 1px;
+}
+.dataset-metrics strong {
+  font: 20px var(--mono);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: var(--s-1) 0 var(--s-1);
+}
+.dataset-metrics > div:last-child strong {
+  font-size: 15px;
+  min-height: 29px;
+}
+.dataset-metrics small {
+  color: var(--dim);
+  font-size: 9px;
+}
+.dataset-main {
+  display: grid;
+  height: 394px;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: var(--s-4);
+}
+.episode-library,
+.episode-view,
+.episode-inspector,
+.dataset-analysis {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.episode-library {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.dataset-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s-4);
+  min-height: 45px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--muted);
+}
+.dataset-panel-heading .eyebrow {
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.dataset-panel-heading > span:last-child {
+  font: 8px var(--mono);
+}
+.dataset-panel-heading .tag {
+  font-size: 6px;
+  padding: 4px;
+}
+.split-tabs {
+  display: flex;
+  padding: var(--s-3);
+  gap: var(--s-1);
+  border-bottom: 1px solid var(--line-soft);
+}
+.split-tabs button {
+  flex: 1;
+  flex-direction: column;
+  gap: var(--s-1);
+  font: 7px var(--mono);
+  border-radius: var(--r-sm);
+  height: 42px;
+  border: 1px solid transparent;
+}
+.split-tabs button span {
+  color: var(--muted);
+  font-size: 10px;
+}
+.split-tabs button.selected {
+  border-color: currentColor;
+  background: var(--surface-raised);
+}
+.split-train {
+  color: var(--cyan);
+  fill: var(--cyan);
+}
+.split-validation {
+  color: var(--violet);
+  fill: var(--violet);
+}
+.split-test {
+  color: var(--muted);
+  fill: var(--muted);
+}
+.split-ood {
+  color: var(--amber);
+  fill: var(--amber);
+}
+.suite-filter {
+  width: calc(100% - 24px);
+  margin: var(--s-3);
+  font-size: 9px;
+}
+.episode-list {
+  height: 0;
+  min-height: 160px;
+  flex: 1;
+  overflow: auto;
+  padding: var(--s-2);
+  scrollbar-width: thin;
+}
+.episode-list > button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  margin-bottom: var(--s-1);
+}
+.episode-list > button.selected {
+  border-color: var(--cyan-dim);
+  background: var(--surface-raised);
+}
+.episode-list > button > div {
+  display: flex;
+  justify-content: space-between;
+  font: 7px var(--mono);
+  color: var(--dim);
+}
+.episode-list > button.selected > div > span:first-child {
+  color: var(--cyan);
+}
+.episode-list strong {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text);
+}
+.episode-list small {
+  font: 7px var(--mono);
+  color: var(--dim);
+}
+.episode-library-foot {
+  display: flex;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border-top: 1px solid var(--line-soft);
+  color: var(--dim);
+  font-size: 9px;
+  line-height: 1.7;
+}
+.episode-library-foot svg {
+  color: var(--cyan);
+}
+.episode-observer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: var(--s-4);
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+}
+.episode-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.episode-canvas {
+  background: var(--bg);
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-height: 240px;
+  padding: var(--s-3);
+  overflow: hidden;
+}
+.episode-canvas > svg {
+  position: absolute;
+  inset: 0;
+  padding: var(--s-3);
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+}
+.episode-grid-line {
+  stroke: var(--line);
+  stroke-width: 0.012;
+}
+.episode-static > rect {
+  fill: var(--surface-raised);
+  stroke: var(--dim);
+  stroke-width: 1;
+}
+.episode-dynamic > circle,
+.episode-dynamic > rect {
+  fill: var(--cyan-dim);
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+.episode-canvas g {
+  cursor: pointer;
+  outline: none;
+}
+.episode-canvas g:hover > rect,
+.episode-canvas g:hover > circle,
+.episode-selected > rect,
+.episode-selected > circle,
+.episode-canvas g:focus-visible > rect,
+.episode-canvas g:focus-visible > circle {
+  stroke: var(--cyan);
+  stroke-width: 2;
+}
+.episode-dynamic > line {
+  stroke: var(--cyan);
+  stroke-width: 1;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.episode-canvas circle.episode-contact {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 1;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.episode-world-label {
+  position: absolute;
+  bottom: var(--s-3);
+  left: var(--s-4);
+  font: 6px var(--mono);
+  letter-spacing: 1px;
+  color: var(--dim);
+  pointer-events: none;
+}
+.episode-timeline {
+  border-top: 1px solid var(--line);
+  padding: var(--s-4);
+}
+.episode-timeline > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 8px var(--mono);
+  color: var(--muted);
+}
+.episode-timeline > div .eyebrow {
+  font-size: 7px;
+}
+.episode-timeline input {
+  width: 100%;
+  margin: var(--s-3) 0;
+  accent-color: var(--cyan);
+}
+.episode-timeline button {
+  width: 26px;
+  height: 22px;
+}
+.episode-inspector {
+  padding: var(--s-4);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.episode-inspector > .eyebrow {
+  font-size: 7px;
+  color: var(--dim);
+}
+.episode-inspector h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: var(--s-4) 0 var(--s-2);
+}
+.episode-inspector > .tag {
+  font-size: 6px;
+}
+.episode-inspector dl {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: var(--s-3) var(--s-2);
+  font-size: 9px;
+  margin: var(--s-5) 0;
+}
+.episode-inspector dt {
+  color: var(--dim);
+}
+.episode-inspector dd {
+  font: 8px var(--mono);
+  margin: 0;
+  text-align: right;
+}
+.episode-provenance {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: var(--s-2);
+  margin: var(--s-5) 0;
+  padding: var(--s-4) 0;
+  color: var(--cyan);
+}
+.episode-provenance strong {
+  font-size: 9px;
+  font-weight: 500;
+}
+.episode-provenance p {
+  color: var(--dim);
+  margin-top: var(--s-1);
+  font-size: 8px;
+}
+.episode-caveat {
+  color: var(--dim);
+  font-size: 8px;
+  line-height: 1.8;
+}
+.episode-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-height: 370px;
+  color: var(--dim);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  font-size: 11px;
+}
+.dataset-analysis {
+  margin-top: var(--s-5);
+}
+.dataset-analysis-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding: 0 var(--s-4);
+  gap: var(--s-4);
+}
+.dataset-analysis-heading > div {
+  display: flex;
+  gap: var(--s-5);
+}
+.dataset-analysis-heading button {
+  font-size: 10px;
+  height: 40px;
+  padding: 0;
+  color: var(--dim);
+  border-bottom: 1px solid transparent;
+}
+.dataset-analysis-heading button.selected {
+  color: var(--text);
+  border-color: var(--cyan);
+}
+.dataset-analysis-heading > span {
+  display: flex;
+  gap: var(--s-3);
+}
+.dataset-analysis-heading i {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  font: 7px var(--mono);
+  font-style: normal;
+}
+.dataset-analysis-heading i:before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+}
+.distribution-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-7);
+  padding: var(--s-4) var(--s-5);
+}
+.dataset-distribution > div {
+  display: flex;
+  justify-content: space-between;
+  color: var(--dim);
+  font: 7px var(--mono);
+  margin-bottom: var(--s-2);
+}
+.dataset-distribution .eyebrow {
+  font-size: 8px;
+  color: var(--muted);
+}
+.dataset-distribution > svg {
+  width: 100%;
+  height: 90px;
+}
+.hist-grid {
+  stroke: var(--line-soft);
+  stroke-width: 1;
+}
+.dataset-distribution text {
+  fill: var(--dim);
+  font: 7px var(--mono);
+}
+.normalization-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-7);
+  padding: var(--s-5);
+}
+.normalization-view > div:first-child {
+  padding: var(--s-3);
+  color: var(--cyan);
+}
+.normalization-view h3 {
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 500;
+  margin: var(--s-3) 0;
+}
+.normalization-view p {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.9;
+  max-width: 430px;
+}
+.normalization-view span {
+  display: block;
+  color: var(--dim);
+  margin-top: var(--s-4);
+  font: 7px var(--mono);
+}
+.normalization-table {
+  max-height: 170px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.normalization-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 9px var(--mono);
+}
+.normalization-table th {
+  text-align: left;
+  color: var(--dim);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  font-size: 8px;
+}
+.normalization-table td,
+.normalization-table th {
+  padding: var(--s-2);
+  border-bottom: 1px solid var(--line-soft);
+}
+.normalization-table td:not(:first-child) {
+  text-align: right;
+  color: var(--muted);
+}
+.dataset-integrity-note {
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--dim);
+  margin-top: var(--s-4);
+}
+@media (min-width: 1700px) {
+  .dataset-main {
+    height: 470px;
+  }
+  .dataset-main {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+  .episode-observer {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+  .episode-canvas {
+    min-height: 320px;
+  }
+  .episode-inspector {
+    padding: var(--s-5);
+  }
+  .episode-inspector dl {
+    font-size: 10px;
+  }
+}
+@media (max-width: 1200px) {
+  .collection-frequency {
+    display: none;
+  }
+  .episode-observer {
+    grid-template-columns: minmax(0, 1fr) 200px;
+  }
+  .dataset-main {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+  .episode-inspector {
+    padding: var(--s-3);
+  }
+}
+@media (max-width: 1000px) {
+  .dataset-main {
+    height: auto;
+    grid-template-rows: auto;
+  }
+  .episode-observer {
+    height: 394px;
+  }
+  .collection-bar {
+    flex-wrap: wrap;
+  }
+  .dataset-main {
+    grid-template-columns: 1fr;
+  }
+  .episode-list {
+    height: 150px;
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .episode-library-foot {
+    display: none;
+  }
+  .split-tabs {
+    max-width: 360px;
+  }
+  .dataset-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .dataset-catalog-bar > span {
+    display: none;
+  }
+}
+@media (max-width: 650px) {
+  .episode-observer {
+    height: auto;
+    grid-template-rows: auto;
+  }
+  .episode-view {
+    min-height: 360px;
+  }
+  .dataset-intro {
+    align-items: flex-start;
+  }
+  .dataset-intro > .tag {
+    display: none;
+  }
+  .collection-bar {
+    gap: var(--s-3);
+  }
+  .collection-bar .button {
+    margin-left: 0;
+  }
+  .episode-observer {
+    grid-template-columns: 1fr;
+  }
+  .episode-list {
+    grid-template-columns: 1fr 1fr;
+  }
+  .dataset-analysis-heading {
+    flex-wrap: wrap;
+    padding-bottom: var(--s-3);
+  }
+  .distribution-grid,
+  .normalization-view {
+    grid-template-columns: 1fr;
+  }
+  .dataset-catalog-bar label {
+    min-width: 0;
+    flex: 1;
+  }
+  .research-subnav {
+    gap: var(--s-3);
+  }
+  .dataset-error {
+    flex-direction: column;
+  }
+}
