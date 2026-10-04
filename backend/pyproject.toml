@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oracle-physics-lab"
+version = "0.2.0"
+description = "Ground-truth foundation for the ORACLE counterfactual physics laboratory"
+requires-python = ">=3.12"
+dependencies = ["fastapi==0.135.1", "uvicorn==0.42.0", "websockets==15.0.1", "pymunk==7.2.0", "pydantic==2.12.5"]
+
+[project.optional-dependencies]
+dev = ["pytest==9.0.2", "httpx==0.28.1", "ruff==0.15.6"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["oracle*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["pytest-cache-files-*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
