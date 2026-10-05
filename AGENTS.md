@@ -35,7 +35,7 @@
 
 ## Validation and Definition of Done
 
-From the repository root, with the backend installed in the active Python environment:
+From the repository root, with the backend and locked CPU ML dependencies installed in the active Python environment (see README):
 
 ```text
 python -m pytest backend/tests

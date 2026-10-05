@@ -15,6 +15,7 @@ from pydantic import Field, ValidationError
 from oracle.datasets.api import router as dataset_router
 from oracle.scenes import scene
 from oracle.session import Session
+from oracle.training.api import router as training_router
 from oracle.world import BodyState, EditEvent, Experiment, StrictModel
 
 sessions: dict[str, Session] = {}
@@ -72,8 +73,9 @@ async def lifespan(_app: FastAPI):
         await task
 
 
-app = FastAPI(title="ORACLE · Ground Truth API", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="ORACLE · Research API", version="0.3.0", lifespan=lifespan)
 app.include_router(dataset_router)
+app.include_router(training_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5181", "http://127.0.0.1:5181"],

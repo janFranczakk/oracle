@@ -6,7 +6,7 @@
 
 ORACLE studies the gap between what a controlled physical world does and what a learned dynamics model predicts. The intended workflow is observation → intervention → model prediction → ground-truth execution → measured error.
 
-**Stages 1–2 are implemented:** a polished, deterministic 2D laboratory and a reproducible dataset engine with an interactive episode explorer. A trained world model is not included. Every motion shown in this release is explicitly labeled ground truth.
+**Stages 1–3 are implemented:** a deterministic 2D laboratory, reproducible datasets and real object-centric PyTorch MLP / GRU training. Research shows measured loss curves, verified checkpoint provenance and held-out rollout evaluation. The editable Lab continues to show ground truth; ghost trajectories enter in Stage 4.
 
 ## Core idea
 
@@ -18,16 +18,19 @@ The simulator knows physical dynamics. Future models learn from recorded object 
 oracle/
 ├── backend/
 │   ├── oracle/        # physics, sessions, API, model contracts, dataset CLI
-│   │   └── datasets/  # procedural sampling, schemas, storage, normalization, workers
+│   │   ├── datasets/  # sampling, storage, train normalization, workers
+│   │   ├── models/    # shared object encoder, MLP / GRU, checkpoint-backed prediction
+│   │   └── training/  # sequences, optimization, checkpointing, metrics, evaluation
 │   ├── tests/         # deterministic replay and API tests
 │   ├── pyproject.toml
-│   └── requirements.lock.txt
+│   ├── requirements.lock.txt
+│   └── requirements-ml.lock.txt
 ├── frontend/
 │   ├── src/
 │   │   ├── api/       # HTTP and WebSocket transport
 │   │   ├── components/# object inspector
 │   │   ├── rendering/ # PixiJS scene and camera geometry
-│   │   ├── research/  # dataset explorer, observed timelines, distributions, roadmap
+│   │   ├── research/  # dataset explorer, training dashboard, measured rollout charts
 │   │   ├── state/     # typed observation store
 │   │   └── timeline/  # recorded state scrubbing and transport
 │   └── pnpm-lock.yaml
@@ -36,10 +39,11 @@ oracle/
 ├── experiments/      # local exports, ignored by Git
 ├── datasets/         # generated collections, ignored by Git
 ├── STAGE_1_REPORT.md
-└── STAGE_2_REPORT.md
+├── STAGE_2_REPORT.md
+└── STAGE_3_REPORT.md
 ```
 
-[Architecture](docs/ARCHITECTURE.md) · [Dataset specification](docs/DATASETS.md) · [Stage 1 report](STAGE_1_REPORT.md) · [Stage 2 report](STAGE_2_REPORT.md)
+[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3 report](STAGE_3_REPORT.md)
 
 Contributor rules: [AGENTS.md](AGENTS.md) · [Git and review workflow](docs/REPOSITORY_WORKFLOW.md). Substantial changes use separate branches and Pull Requests into `main`. GitHub Actions checks the backend on Linux / Windows and the frontend tests, lint, formatting and production build.
 
@@ -53,7 +57,7 @@ PixiJS provides GPU rendering, anti-aliased geometry, cached shapes and smooth c
 
 ## World model
 
-Stage 1 includes object-structured observations and a `DynamicsModel` protocol for future MLP, GRU and Transformer implementations. The planned V1 path is object encoder → latent dynamics → structured state decoder. V2 can introduce visual encoders and latent visual dynamics. PyTorch, training code and model weights enter in Stage 3.
+Stage 3 implements object encoder → pooled scene context → shared temporal MLP / GRU → learned motion residuals and contact logits. Verified checkpoints implement the `DynamicsModel` protocol and support autoregressive rollouts. Static geometry is context, not a target. Attention and Transformer models follow later; V2 can introduce visual encoders.
 
 ## Counterfactual reasoning
 
@@ -61,7 +65,7 @@ Today you can pause, edit a body and observe the changed ground-truth world. Edi
 
 ## Prediction pipeline
 
-Planned: frame history + typed intervention → trained dynamics model → autoregressive rollout → model-attributed frames and named uncertainty estimates → UI trajectory layer. A separate simulator run will produce the actual future for comparison. Stage 1 displays “No model connected”, “Prediction unavailable” and “Confidence not estimated”.
+Available in Research / CLI: frame history → trained weights → autoregressive rollout → errors against held-out observations. The checkpoint-backed adapter returns model-attributed frames without simulator calls. Stage 4 connects these outputs to the Lab's ghost trajectory layer. Intervention conditioning and uncertainty remain later work. The Lab still displays “No model connected” because its prediction UI is not connected yet.
 
 ## Screenshots
 
@@ -87,7 +91,9 @@ Screenshot reserved for Stage 4. No learned predictions are shown in Stage 1.
 
 ### Training Dashboard
 
-Screenshot reserved for Stage 3. No fabricated training metrics are displayed.
+![Stage 3 training dashboard](docs/screenshots/stage3-training-1440.jpg)
+
+[1920×1080 training panel](docs/screenshots/stage3-training-1920.jpg) · [OOD rollout evaluation](docs/screenshots/stage3-evaluation-1440.jpg)
 
 ## Demo workflow
 
@@ -101,6 +107,8 @@ Screenshot reserved for Stage 3. No fabricated training metrics are displayed.
 8. Choose another scene and seed to start another reproducible experiment.
 9. Switch to **Research → Dataset engine**. Choose a collection seed, size and episode duration, then **Collect dataset**. An isolated Python worker collects real observations.
 10. Inspect train / validation / test / OOD episodes. Scrub their observed timeline, select a specimen, compare initial mass / speed distributions and inspect normalization provenance.
+11. Open **Research → World model**, choose MLP or GRU, a dataset, training seed, epoch count and observed history. **Train world model** launches real optimization in a separate worker.
+12. Inspect logged losses and the validation-selected checkpoint. Choose test / OOD groups and rollout horizons, compare with the constant-velocity reference, and export evaluation JSON.
 
 ## Installation
 
@@ -110,6 +118,7 @@ Requirements: Python 3.12+, Node.js 22.12+ (verified with 24.19), pnpm (verified
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r backend/requirements.lock.txt
 .\.venv\Scripts\python.exe -m pip install --no-deps -e ./backend
+.\.venv\Scripts\python.exe -m pip install -r backend/requirements-ml.lock.txt
 cd frontend
 pnpm install --frozen-lockfile
 cd ..
@@ -173,11 +182,20 @@ Splits are assigned before simulation and remain disjoint at episode / seed leve
 
 ## Training
 
-Stage 3 will add PyTorch MLP / GRU training, validation, rollout and checkpoints containing weights, optimizer state, epoch, config, normalization and architecture metadata. `oracle.train` is not available in this stage.
+```powershell
+.\.venv\Scripts\python.exe -m oracle.train --dataset datasets/demo --output checkpoints/mlp --model mlp --epochs 35
+.\.venv\Scripts\python.exe -m oracle.train --dataset datasets/demo --output checkpoints/gru --model gru --epochs 35
+```
+
+Defaults: CPU, two threads, history four observed frames, 64-dimensional embeddings / hidden state, AdamW lr 0.001, batch 64. `best.pt` is selected by validation alone; `last.pt` contains optimizer / RNG state for exact resume in the verified CPU runtime. Every checkpoint binds dataset hashes, architecture, normalization, gravity and observation clock. [Configuration, resume, artifact layout and bounds](docs/TRAINING.md).
 
 ## Evaluation
 
-Model evaluation enters with Stage 3–4. No AI accuracy or confidence claims can be made from this release.
+```powershell
+.\.venv\Scripts\python.exe -m oracle.evaluate checkpoints/gru/best.pt --dataset datasets/demo --output experiments/gru-evaluation.json
+```
+
+Report one-step position / velocity MSE, periodic rotation MAE, contact classification and autoregressive ADE / FDE at 1 / 5 / 10 / 20 / 50 observed steps. Validation, test and six OOD suites stay separate. The same samples also score a named constant-velocity analytical reference. No confidence estimates are invented. [Measured results and limitations](STAGE_3_REPORT.md).
 
 ## Experiments
 
@@ -192,7 +210,7 @@ An experiment contains schema and engine versions, a null model version, timesta
 
 ## Metrics
 
-Stage 1 displays physical state and **translational kinetic energy** computed from current observations. It excludes rotational energy and is not a conservation diagnostic. Later evaluation will report position / velocity MSE, periodic rotation error, collision classification accuracy, ADE, FDE, trajectory error and error versus horizon. Uncertainty will always identify its estimation method and be checked against observed error.
+The Lab displays physical state and **translational kinetic energy** from observations; it excludes rotational energy. Research reports real learned-model errors in physical units, contact classification with class counts and errors versus numeric horizons. Undefined classification ratios remain null. See [metric definitions](docs/TRAINING.md#evaluation-definitions). Uncertainty is not estimated in Stage 3.
 
 ## Roadmap
 
@@ -200,7 +218,7 @@ Stage 1 displays physical state and **translational kinetic energy** computed fr
 | --- | --- | --- |
 | 1 | Physics foundation and polished visual sandbox | Implemented and verified |
 | 2 | Dataset engine, splits, normalization, data explorer | Implemented and verified |
-| 3 | Object encoder, MLP / GRU, training and validation | Next |
+| 3 | Object encoder, MLP / GRU, training, validation and rollout evaluation | Implemented and verified |
 | 4 | Learned rollout, ghost futures and prediction error | Planned |
 | 5 | Interventions, branch trees and comparative futures | Planned |
 | 6 | Transformer, object attention and uncertainty | Planned |
@@ -209,7 +227,7 @@ Stage 1 displays physical state and **translational kinetic energy** computed fr
 
 ## Limitations
 
-Local prototype: no accounts, remote hosting or persistent session database. Dataset collection uses a separate process. Browser snapshots are limited to eight and can be cleared by browser storage reset; export important experiments. Recordings stop at 120 simulated seconds, scenes support 64 objects and experiments 512 edits. Seeks replay from the start. Use ordinary speeds and avoid heavy initial overlaps. The procedural dataset is a bounded research baseline, not proof of generalization or numerical fidelity at extreme speed. 3D, ML, training, branching, model comparison and uncertainty remain later work. Both reports record actual verification coverage.
+Local prototype: no accounts, remote hosting or persistent session database. Dataset collection and training use separate processes. Browser snapshots are limited to eight; export important experiments. Recordings stop at 120 simulated seconds, scenes support 64 objects and experiments 512 edits. Seeks replay from the start. Use ordinary speeds and avoid heavy initial overlaps. The learned models are small baselines: some metrics improve while others are worse than constant velocity, and OOD / long-horizon drift remains substantial. CUDA training is available as a guarded option but was not verified. Checkpoints remain local; UI cancellation / resume, Lab ghost trajectories, branching, advanced model comparison, uncertainty and 3D are future work. Stage reports record actual verification coverage.
 
 ## Research questions
 
