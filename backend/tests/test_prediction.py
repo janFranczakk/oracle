@@ -6,6 +6,7 @@ import subprocess
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import ExitStack
 
 import pytest
 from fastapi.testclient import TestClient
@@ -133,6 +134,21 @@ def test_history_requires_real_post_edit_samples(models):
     assert next(b for b in context["history"][0]["objects"] if b["id"] == "orb-01")["mass"] == 9
 
 
+def test_forecast_after_material_and_static_geometry_edits(models):
+    session = Session()
+    session.advance(4)
+    session.update("orb-01", {"mass": 9})
+    session.update("ramp-1", {"rotation": 0.5})
+    session.advance(4)
+    catalog = ModelCatalog(models)
+    context = capture(session, request_for(session), catalog.describe("gru"))
+    result = forecast(catalog.checkpoint("gru"), context)
+    for frame in result["frames"] + result["reference"]["frames"]:
+        assert next(b for b in frame["objects"] if b["id"] == "orb-01")["mass"] == 9
+        assert next(b for b in frame["objects"] if b["id"] == "ramp-1")["rotation"] == 0.5
+    assert session.engine.tick == 8 and session.duration == 8
+
+
 def test_environment_static_world_and_time_limits(models):
     session = Session()
     model = ModelCatalog(models).describe("gru")
@@ -223,9 +239,10 @@ def test_api_discards_stale_result_without_blocking_commands(models, monkeypatch
 
     monkeypatch.setattr(service, "run", slow)
     monkeypatch.setattr(api, "predictions", service)
-    with TestClient(api.app) as client, ThreadPoolExecutor() as pool:
+    with TestClient(api.app) as client, ThreadPoolExecutor() as pool, ExitStack() as stack:
         created = client.post("/api/sessions", json={}).json()
         sid = created["id"]
+        stack.enter_context(client.websocket_connect(f"/ws/{sid}"))
         state = client.post(
             f"/api/sessions/{sid}/commands", json={"kind": "step", "steps": 8}
         ).json()
@@ -244,6 +261,39 @@ def test_api_discards_stale_result_without_blocking_commands(models, monkeypatch
         assert response.status_code == 200
         release.set()
         assert pending.result(timeout=5).status_code == 409
+    api.sessions.clear()
+
+
+def test_worker_timeout_releases_prediction_capacity(models, monkeypatch):
+    service = PredictionService(models)
+    session = Session()
+    session.advance(4)
+    context = capture(session, request_for(session), service.catalog.describe("gru"))
+
+    def timeout(*args, **kwargs):
+        raise subprocess.TimeoutExpired("prediction", 45)
+
+    monkeypatch.setattr(subprocess, "run", timeout)
+    with pytest.raises(ValueError, match="45 seconds"):
+        service.run(context)
+    assert not service.lock.locked()
+
+
+def test_missing_ml_dependencies_and_invalid_model_do_not_change_world(models, monkeypatch):
+    monkeypatch.setattr(api, "predictions", PredictionService(models))
+    with TestClient(api.app) as client:
+        sid = client.post("/api/sessions", json={}).json()["id"]
+        api.sessions[sid].advance(4)
+        before = client.get(f"/api/sessions/{sid}").json()
+        request = request_for(api.sessions[sid]).model_dump()
+        result = client.post(
+            f"/api/sessions/{sid}/predict", json={**request, "model_id": "missing"}
+        )
+        assert result.status_code == 422
+        assert "Traceback" not in result.text
+        monkeypatch.setattr(api.importlib.util, "find_spec", lambda _: None)
+        assert client.post(f"/api/sessions/{sid}/predict", json=request).status_code == 503
+        assert client.get(f"/api/sessions/{sid}").json() == before
     api.sessions.clear()
 
 
