@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { DatasetExplorer } from './DatasetExplorer';
+import { TrainingDashboard } from './TrainingDashboard';
 import './datasets.css';
 const stages = [
   ['01', 'Physics foundation', 'Deterministic simulation, state editing and replay.', Orbit],
@@ -23,10 +24,17 @@ const stages = [
   ['08', 'Planning', 'Candidate actions evaluated through learned rollouts.', ArrowUpRight],
 ] as const;
 export function Research() {
-  const [view, setView] = useState('datasets');
+  const [view, setView] = useState('training');
   return (
     <div className="research-page">
       <nav className="research-subnav" aria-label="Research sections">
+        <button
+          className={view === 'training' ? 'selected' : ''}
+          onClick={() => setView('training')}
+        >
+          <BrainCircuit size={14} />
+          World model<span className="tag">LIVE</span>
+        </button>
         <button
           className={view === 'datasets' ? 'selected' : ''}
           onClick={() => setView('datasets')}
@@ -39,7 +47,9 @@ export function Research() {
           Research roadmap
         </button>
       </nav>
-      {view === 'datasets' ? (
+      {view === 'training' ? (
+        <TrainingDashboard />
+      ) : view === 'datasets' ? (
         <DatasetExplorer />
       ) : (
         <>
@@ -52,17 +62,16 @@ export function Research() {
             </h1>
             <p>
               A controlled environment for testing learned dynamics. Physics and dataset foundations
-              are ready; model performance will appear here once training and evaluation are
-              implemented.
+              are ready; MLP and GRU training now measure learned dynamics on held-out episodes.
             </p>
             <div className="research-integrity">
               <span className="live-dot" />
-              GROUND TRUTH AVAILABLE<span>·</span>NO TRAINED MODEL
+              GROUND TRUTH AVAILABLE<span>·</span>LEARNED DYNAMICS AVAILABLE
             </div>
           </div>
           <div className="roadmap-grid">
             {stages.map(([number, title, desc, Icon], i) => (
-              <div className={`roadmap-card ${i < 2 ? 'ready' : ''}`} key={number}>
+              <div className={`roadmap-card ${i < 3 ? 'ready' : ''}`} key={number}>
                 <div>
                   <Icon size={20} />
                   <span>{number}</span>
@@ -70,12 +79,12 @@ export function Research() {
                 <h3>{title}</h3>
                 <p>{desc}</p>
                 <span className="roadmap-status">
-                  {i < 2 ? (
+                  {i < 3 ? (
                     <>
                       <Check size={12} />
                       IMPLEMENTED
                     </>
-                  ) : i === 2 ? (
+                  ) : i === 3 ? (
                     'NEXT STAGE'
                   ) : (
                     'PLANNED'

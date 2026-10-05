@@ -409,14 +409,14 @@ function ModelStatus() {
   return (
     <div className="model-status">
       <div className="section-label">
-        <span>LEARNED WORLD MODEL</span>
-        <span className="tag violet">STAGE 3</span>
+        <span>PREDICTION LAB</span>
+        <span className="tag violet">STAGE 4</span>
       </div>
       <div className="model-empty">
         <div className="latent-mark">◈</div>
         <div>
           <strong>No model connected</strong>
-          <p>Predictions begin with a trained model.</p>
+          <p>Evaluate trained models in Research.</p>
         </div>
       </div>
       <div className="model-meta">

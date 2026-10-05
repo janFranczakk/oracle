@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Activity,
   ArrowRight,
@@ -25,10 +25,12 @@ import { useLab } from './state/lab';
 import { WorldViewport } from './rendering/WorldViewport';
 import { Inspector } from './components/Inspector';
 import { Timeline } from './timeline/Timeline';
-import { Research } from './research/Research';
 import type { Body, Command, Experiment, Scene, Shape } from './types';
 
 type Snapshot = { id: string; name: string; data: Experiment };
+const Research = lazy(() =>
+  import('./research/Research').then((module) => ({ default: module.Research })),
+);
 const SNAPSHOTS_KEY = 'oracle.snapshots.v1';
 const sceneTitles: Record<Scene, string> = {
   incline: 'The inclined plane',
@@ -360,7 +362,7 @@ export function App() {
           <img src="/oracle.svg" alt="" />
           <div>
             <strong>
-              ORACLE<span className="brand-version"> / 02</span>
+              ORACLE<span className="brand-version"> / 03</span>
             </strong>
             <span>COUNTERFACTUAL PHYSICS LAB</span>
           </div>
@@ -378,7 +380,7 @@ export function App() {
             onClick={() => useLab.getState().set({ page: 'research' })}
           >
             <FlaskConical size={15} />
-            Research<span className="nav-tag">DATA</span>
+            Research<span className="nav-tag">ML</span>
           </button>
         </nav>
         <div className="header-status">
@@ -390,7 +392,7 @@ export function App() {
                 ? 'CONNECTING'
                 : 'ENGINE OFFLINE'}
           </span>
-          <span className="version-pill">v0.2.0</span>
+          <span className="version-pill">v0.3.0</span>
         </div>
       </header>
       <div className="app-body">
@@ -561,7 +563,15 @@ export function App() {
               </div>
             </>
           ) : (
-            <Research />
+            <Suspense
+              fallback={
+                <div className="research-page" role="status">
+                  Loading research workspace…
+                </div>
+              }
+            >
+              <Research />
+            </Suspense>
           )}
           <footer className="app-footer">
             <span>
@@ -571,7 +581,7 @@ export function App() {
             <span>
               {selected && page === 'lab'
                 ? `SELECTED / ${selected.id.toUpperCase()}`
-                : 'ORACLE / DATASET ENGINE'}
+                : 'ORACLE / RESEARCH'}
               <span className="dim">·</span> LOCAL SESSION
             </span>
           </footer>
@@ -780,8 +790,9 @@ export function App() {
                 <h2>What actually happens.</h2>
                 <p>
                   ORACLE is an interactive laboratory for learned world models and counterfactual
-                  reasoning. Stages 1–2 establish a controlled physics world and reproducible
-                  datasets. Prediction, training and model comparison follow in later stages.
+                  reasoning. Stages 1–3 provide a controlled physics world, reproducible datasets
+                  and real MLP / GRU training. Research measures learned rollouts against held-out
+                  observations.
                 </p>
                 <div className="about-principle">
                   <Orbit size={24} />
@@ -796,10 +807,10 @@ export function App() {
                 <div className="about-principle">
                   <BookOpen size={24} />
                   <div>
-                    <strong>Learned dynamics · future stages</strong>
+                    <strong>Learned dynamics · Research</strong>
                     <p>
-                      Future predictions will come from trained models. Their errors will be
-                      measured against reality.
+                      Train object-centric models and inspect their measured errors in Research.
+                      Ghost trajectories in the Lab follow in Stage 4.
                     </p>
                   </div>
                 </div>

@@ -1,0 +1,587 @@
+.research-page:has(.training-dashboard) {
+  padding: 0 var(--s-2) var(--s-4);
+}
+.research-page:has(.training-dashboard) .research-subnav {
+  margin-bottom: var(--s-4);
+}
+.training-dashboard {
+  max-width: 1760px;
+  margin: auto;
+}
+.training-workspace {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr) 250px;
+  gap: 18px;
+  align-items: start;
+}
+.training-library,
+.training-controls,
+.training-chart-panel,
+.evaluation-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.training-panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+}
+.training-panel-title > span:last-child,
+.training-panel-title > svg {
+  color: var(--dim);
+  font: 10px var(--mono);
+}
+.training-panel-title p {
+  font-size: 9px;
+  color: var(--dim);
+  margin-top: 6px;
+}
+.training-run-list {
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 0 8px 8px;
+}
+.training-run {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 10px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  margin-bottom: 4px;
+}
+.training-run:hover {
+  background: var(--surface-hover);
+}
+.training-run.selected {
+  border-color: var(--cyan-dim);
+  background: #18303980;
+}
+.training-run > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 9px;
+}
+.training-run strong {
+  font-size: 12px;
+  font-weight: 550;
+}
+.training-run > span {
+  font: 8px var(--mono);
+  color: var(--muted);
+}
+.training-run p {
+  font: 8px var(--mono);
+  color: var(--dim);
+  margin-top: 7px;
+}
+.training-run i {
+  font-style: normal;
+  padding: 0 4px;
+}
+.run-state {
+  margin-left: auto;
+  color: var(--dim);
+}
+.run-state.complete {
+  color: var(--cyan);
+}
+.run-state.failed {
+  color: var(--red);
+}
+.spin {
+  animation: training-spin 1.5s linear infinite;
+}
+@keyframes training-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.training-architecture {
+  border-top: 1px solid var(--line-soft);
+  padding: 18px;
+}
+.training-architecture > div {
+  font-size: 10px;
+  margin-top: 14px;
+}
+.training-architecture > div > span {
+  font: 8px var(--mono);
+  color: var(--cyan);
+  margin-right: 10px;
+}
+.training-architecture small {
+  display: block;
+  color: var(--dim);
+  font-size: 8px;
+  margin: 6px 0 0 23px;
+}
+.training-architecture > svg {
+  transform: rotate(90deg);
+  color: var(--dim);
+  margin: 10px 0 0 25px;
+}
+.training-architecture p {
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin-top: 20px;
+}
+.training-run-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0 16px;
+}
+.training-run-heading h2 {
+  font-weight: 450;
+  font-size: 19px;
+  margin-top: 7px;
+}
+.run-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 8px var(--mono);
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+}
+.run-status.complete {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+}
+.run-status.failed {
+  color: var(--red);
+}
+.loss-chart {
+  height: 218px;
+  min-width: 0;
+}
+.chart-legend {
+  display: flex;
+  gap: 14px;
+  font: 8px var(--mono);
+  color: var(--muted);
+}
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.chart-legend span:before {
+  content: '';
+  width: 13px;
+  height: 2px;
+  background: var(--dim);
+}
+.chart-legend .cyan-key:before {
+  background: var(--cyan);
+}
+.chart-legend .violet-key:before {
+  background: var(--violet);
+}
+.training-chart-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 13px 18px;
+  font: 7px var(--mono);
+  color: var(--dim);
+  border-top: 1px solid var(--line-soft);
+}
+.evaluation-panel {
+  margin-top: 16px;
+}
+.training-panel-title select {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 7px;
+  font: 9px var(--mono);
+  max-width: 190px;
+}
+.training-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-block: 1px solid var(--line-soft);
+}
+.training-metric {
+  padding: 14px 18px;
+  border-right: 1px solid var(--line-soft);
+}
+.training-metric:last-child {
+  border: 0;
+}
+.training-metric > span {
+  font: 7px var(--mono);
+  letter-spacing: 0.5px;
+  color: var(--dim);
+}
+.training-metric strong {
+  display: block;
+  font: 21px var(--mono);
+  font-weight: 400;
+  margin-top: 10px;
+  letter-spacing: -1px;
+}
+.training-metric small {
+  font-size: 9px;
+  color: var(--dim);
+  margin-left: 6px;
+  letter-spacing: 0;
+}
+.training-metric p {
+  font: 7px var(--mono);
+  color: var(--muted);
+  margin-top: 8px;
+}
+.rollout-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 0;
+}
+.rollout-chart {
+  height: 145px;
+}
+.horizon-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 18px;
+}
+.horizon-controls > span {
+  font: 7px var(--mono);
+  color: var(--dim);
+  margin-right: 8px;
+}
+.horizon-controls > span:last-child {
+  margin-left: auto;
+}
+.horizon-controls button {
+  font: 9px var(--mono);
+  border-radius: 4px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+}
+.horizon-controls button.selected {
+  color: var(--cyan);
+  background: var(--cyan-dim);
+}
+.rollout-scores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 13px 18px;
+  border-top: 1px solid var(--line-soft);
+}
+.rollout-scores > span {
+  font: 6px var(--mono);
+  color: var(--dim);
+}
+.rollout-scores strong {
+  display: block;
+  font: 11px var(--mono);
+  color: var(--text);
+  margin-top: 7px;
+}
+.evaluation-footnote {
+  padding: 0 18px 14px;
+  color: var(--dim);
+  font-size: 8px;
+  line-height: 1.7;
+}
+.training-family {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: hidden;
+}
+.training-family button {
+  display: block;
+  font: 12px var(--mono);
+  padding: 12px 5px;
+  text-align: left;
+  padding-left: 10px;
+}
+.training-family small {
+  display: block;
+  font: 7px var(--sans);
+  color: var(--dim);
+  margin-top: 5px;
+}
+.training-family .selected {
+  background: var(--cyan-dim);
+  color: var(--cyan);
+}
+.training-field {
+  display: flex;
+  flex-direction: column;
+  font: 7px var(--mono);
+  letter-spacing: 0.8px;
+  color: var(--dim);
+  gap: 8px;
+  margin: 0 16px 14px;
+}
+.training-field input,
+.training-field select {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font: 9px var(--mono);
+  padding: 9px;
+  width: 100%;
+  letter-spacing: 0;
+}
+.training-field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 16px;
+  gap: 12px;
+}
+.training-field-grid .training-field {
+  margin-inline: 0;
+}
+.training-dataset-note {
+  color: var(--muted);
+  font: 7px var(--mono);
+  margin: -4px 16px 20px;
+  line-height: 1.7;
+}
+.training-recipe {
+  padding: 0 16px 16px;
+}
+.training-recipe > span {
+  display: flex;
+  justify-content: space-between;
+  color: var(--dim);
+  font: 7px var(--mono);
+  padding: 6px 0;
+}
+.training-recipe strong {
+  font-weight: 400;
+  color: var(--muted);
+}
+.training-start {
+  width: calc(100% - 32px);
+  margin: 0 16px;
+  font-size: 10px;
+}
+.training-limit {
+  font-size: 8px;
+  line-height: 1.7;
+  color: var(--dim);
+  margin: 11px 16px 18px;
+}
+.checkpoint-card {
+  border-top: 1px solid var(--line);
+  padding: 0 16px 18px;
+}
+.checkpoint-card .training-panel-title {
+  padding-inline: 0;
+}
+.checkpoint-verified {
+  color: var(--cyan);
+  font: 6px var(--mono);
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.checkpoint-card dl {
+  font-size: 9px;
+  margin: 17px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+.checkpoint-card dt {
+  color: var(--dim);
+}
+.checkpoint-card dd {
+  margin: 0;
+  font: 8px var(--mono);
+  word-break: break-all;
+  text-align: right;
+}
+.checkpoint-card code {
+  display: block;
+  font: 7px var(--mono);
+  line-height: 1.8;
+  word-break: break-all;
+  color: var(--muted);
+  margin: 7px 0 13px;
+}
+.checkpoint-card .button {
+  width: 100%;
+  margin-top: 4px;
+  font-size: 9px;
+}
+.checkpoint-card > p {
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--dim);
+}
+.training-empty {
+  min-height: 218px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--dim);
+  padding: 18px;
+  text-align: center;
+}
+.training-empty h3 {
+  font-size: 14px;
+  font-weight: 450;
+  color: var(--muted);
+}
+.training-empty p {
+  font-size: 10px;
+  line-height: 1.8;
+}
+.training-empty.small {
+  min-height: 130px;
+}
+.training-empty.evaluation {
+  min-height: 165px;
+}
+.training-error {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--red);
+  border: 1px solid #6e414c;
+  background: #291c24;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 11px;
+  margin-bottom: 14px;
+}
+.training-progress {
+  margin-bottom: 15px;
+}
+.training-progress > div {
+  display: flex;
+  justify-content: space-between;
+  color: var(--cyan);
+  font: 8px var(--mono);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.training-progress progress {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--cyan);
+}
+.training-integrity {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 9px;
+  color: var(--dim);
+  padding: 18px 0;
+}
+.training-integrity > span:last-child {
+  margin-left: auto;
+}
+@media (min-width: 1750px) {
+  .training-workspace {
+    grid-template-columns: 220px minmax(0, 1fr) 290px;
+    gap: 24px;
+  }
+  .loss-chart {
+    height: 265px;
+  }
+  .rollout-chart {
+    height: 170px;
+  }
+  .training-run-heading h2 {
+    font-size: 22px;
+  }
+}
+@media (max-width: 1200px) {
+  .training-workspace {
+    grid-template-columns: 160px minmax(0, 1fr) 225px;
+    gap: 12px;
+  }
+  .chart-legend {
+    gap: 8px;
+    font-size: 7px;
+  }
+  .training-metric {
+    padding: 12px;
+  }
+  .training-metric strong {
+    font-size: 16px;
+  }
+  .training-chart-footer {
+    font-size: 6px;
+    padding-inline: 10px;
+  }
+  .rollout-heading {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 950px) {
+  .training-workspace {
+    grid-template-columns: minmax(0, 1fr) 230px;
+  }
+  .training-library {
+    grid-column: 1 / -1;
+  }
+  .training-run-list {
+    display: flex;
+    overflow-x: auto;
+  }
+  .training-run {
+    min-width: 160px;
+    width: 160px;
+  }
+  .training-architecture {
+    display: none;
+  }
+  .training-integrity {
+    flex-wrap: wrap;
+  }
+  .training-integrity > span:last-child {
+    margin-left: 0;
+  }
+}
+@media (max-width: 650px) {
+  .training-workspace {
+    display: flex;
+    flex-direction: column;
+  }
+  .training-workspace > * {
+    width: 100%;
+  }
+  .training-controls {
+    order: -1;
+  }
+  .training-metrics {
+    grid-template-columns: 1fr;
+  }
+  .training-metric {
+    border-right: 0;
+  }
+  .rollout-scores {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
