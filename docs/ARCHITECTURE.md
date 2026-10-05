@@ -40,7 +40,7 @@ Full metadata is sent on connection, edits, scene changes and commands. Playing 
 
 Each session retains up to 14,400 solver ticks (120 simulated seconds), 64 objects and 512 edits. Idle disconnected sessions expire after 30 minutes. Disconnecting pauses an unattended world. This local research prototype supports 16 simultaneous sessions; it does not use a persistent database. Browser snapshots retain at most eight experiments and can be exported as JSON.
 
-Import replay runs in a worker thread. Long seeks currently replay synchronously; a future recording store should use solver checkpoints / replay workers while preserving deterministic semantics. Stage 2 dataset collection runs in an isolated Python subprocess. Future training will also run outside the API event loop.
+Import replay runs in a worker thread. Long seeks currently replay synchronously; a future recording store should use solver checkpoints / replay workers while preserving deterministic semantics. Dataset collection and Stage 3 training run in isolated Python subprocesses, outside the API event loop.
 
 ## Stage 2 data flow
 
@@ -71,15 +71,41 @@ The manifest is published after all episodes and normalization. Readers validate
 
 RESEARCH uses SVG for a read-only replay of stored states and histogram counts; it performs no dynamics integration. The editable Lab keeps its PixiJS renderer and unchanged solver ownership. The dataset worker's status files permit progress updates while another session renders or plays.
 
-## Stage 2–8 extension points
+## Stage 3 learned dynamics
+
+```text
+verified split-owned episode windows + train normalizer
+                  │
+       shared per-object encoder (22 → 64 features)
+                  │
+       object embedding + masked scene mean
+                  │
+       shared temporal MLP / GRU
+                  │
+       learned motion residuals + contact logits
+                  │
+       AdamW train / validation-only checkpoint selection
+                  │
+       checkpoint weights + optimizer + provenance
+                  │
+       held-out one-step / free autoregressive evaluation
+                  │
+       Research charts + test / OOD groups + CV reference
+```
+
+`models/dynamics.py` provides interchangeable object-centric temporal architectures. `training/data.py` owns verified sequences, categorical / static encoding, environment input and padding. `engine.py` owns deterministic optimization and validation selection. `checkpoint.py` verifies bounded weight artifacts and binds exact normalization / dataset identity. `evaluation.py` feeds model outputs back into its own input; it does not call physics. `metrics.py` reports physical-unit errors and explicit contact class counts. CLI and API workers share this path.
+
+`models/inference.py` adapts checkpoint weights to `DynamicsModel` and typed frames, preserving identity and sampled ticks. Interventions are rejected until conditioning is implemented. Uncertainty remains unset. The API imports training schemas / catalog code without loading PyTorch; heavy training runs in a locked subprocess. The Research workspace is lazy-loaded so charting dependencies do not enlarge the initial Lab bundle. [Training specification](TRAINING.md) defines the configuration, artifact and evaluation contracts.
+
+## Stage 4–8 extension points
 
 `contracts.py` defines `DynamicsModel`, an object-centric frame-history input, typed interventions and a model-attributed `Prediction` result. Frontend prediction responses use a separate `source: 'learned_model'` type. No current endpoint returns model predictions.
 
 | Stage | Planned modules | Research boundary |
 | --- | --- | --- |
 | 2 — implemented | `datasets/`, headless collection / inspection | Seeded episodes; splits by episode; train-only normalization; explicit OOD ranges |
-| 3 | `models/`, `training/` | PyTorch object encoder + replaceable MLP / GRU dynamics; configuration-rich checkpoints |
-| 4 | `prediction/`, `analytics/` | One-step and autoregressive model rollout; ADE / FDE / MSE versus ground truth |
+| 3 — implemented | `models/`, `training/` | PyTorch encoder, MLP / GRU, checkpoints, one-step / autoregressive evaluation |
+| 4 | `prediction/`, `analytics/` | Connect learned rollout to Lab ghost trajectories and per-object ground-truth error visualization |
 | 5 | `counterfactual/` | Immutable source observations, intervention branches, separate prediction and reality execution |
 | 6 | `models/attention/`, `uncertainty/` | Temporal Transformer, ensemble / MC dropout outputs with named estimation methods |
 | 7 | `experiments/`, `research/` | Matched-model evaluations, OOD suites, batch runs and honest reports |
