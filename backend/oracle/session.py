@@ -2,6 +2,7 @@
 
 from datetime import UTC, datetime
 from time import monotonic
+from uuid import uuid4
 
 from oracle.physics import PhysicsEngine
 from oracle.scenes import scene
@@ -12,6 +13,7 @@ MAX_TICKS = 14400
 
 class Session:
     def __init__(self, world: World | None = None):
+        self.generation = uuid4().hex
         self.origin = world.model_copy(deep=True) if world is not None else scene()
         self.engine = PhysicsEngine(self.origin)
         self.events: list[EditEvent] = []
@@ -126,6 +128,8 @@ class Session:
     def payload(self, full: bool = True) -> dict:
         frame = self.engine.frame()
         envelope = {
+            "generation": self.generation,
+            "last_edit_tick": max((e.tick for e in self.events if e.tick <= frame.tick), default=0),
             "type": "full" if full else "frame",
             "tick": frame.tick,
             "duration": self.duration,

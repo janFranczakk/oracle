@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oracle-physics-lab"
-version = "0.3.0"
+version = "0.4.0"
 description = "Physics, datasets and learned dynamics for the ORACLE research laboratory"
 requires-python = ">=3.12"
 dependencies = ["fastapi==0.135.1", "uvicorn==0.42.0", "websockets==15.0.1", "pymunk==7.2.0", "pydantic==2.12.5"]

@@ -97,15 +97,21 @@ verified split-owned episode windows + train normalizer
 
 `models/inference.py` adapts checkpoint weights to `DynamicsModel` and typed frames, preserving identity and sampled ticks. Interventions are rejected until conditioning is implemented. Uncertainty remains unset. The API imports training schemas / catalog code without loading PyTorch; heavy training runs in a locked subprocess. The Research workspace is lazy-loaded so charting dependencies do not enlarge the initial Lab bundle. [Training specification](TRAINING.md) defines the configuration, artifact and evaluation contracts.
 
-## Stage 4–8 extension points
+## Stage 4 Prediction Lab
 
-`contracts.py` defines `DynamicsModel`, an object-centric frame-history input, typed interventions and a model-attributed `Prediction` result. Frontend prediction responses use a separate `source: 'learned_model'` type. No current endpoint returns model predictions.
+The paused Lab freezes real sampled observations and the experiment journal through its anchor. A bounded subprocess loads a verified checkpoint, calls the existing learned adapter and independently replays Pymunk to that anchor for the physical reference. Learned frames never use reference outputs as inputs. The live world / recording is untouched; reference conditions are held at the anchor, excluding future recorded edits.
+
+`prediction/` owns catalog, capture, supervision, replay and metrics. `oracle.predict` owns worker inference. Session envelopes add transient generation and last edit tick, preserving portable Experiment schema 1. Both server and Zustand reject predictions after generation / revision / tick / paused-state changes. The Pixi ghost layer and independent forecast cursor render exact sampled model / reference poses; the observation timeline still owns real playback. Recharts is loaded on demand for measured errors. [Prediction specification](PREDICTION.md) defines the clocks, API, provenance, metrics and bounds.
+
+## Stage 5–8 extension points
+
+`contracts.py` defines `DynamicsModel`, an object-centric frame-history input, typed interventions and a model-attributed `Prediction` result. Lab responses use the versioned `oracle-prediction-v1` schema with separate learned / physical-reference sources. Intervention conditioning is still rejected; uncertainty remains unset.
 
 | Stage | Planned modules | Research boundary |
 | --- | --- | --- |
 | 2 — implemented | `datasets/`, headless collection / inspection | Seeded episodes; splits by episode; train-only normalization; explicit OOD ranges |
 | 3 — implemented | `models/`, `training/` | PyTorch encoder, MLP / GRU, checkpoints, one-step / autoregressive evaluation |
-| 4 | `prediction/`, `analytics/` | Connect learned rollout to Lab ghost trajectories and per-object ground-truth error visualization |
+| 4 — implemented | `prediction/` | Verified learned rollout, Lab ghost trajectories and per-object ground-truth error visualization |
 | 5 | `counterfactual/` | Immutable source observations, intervention branches, separate prediction and reality execution |
 | 6 | `models/attention/`, `uncertainty/` | Temporal Transformer, ensemble / MC dropout outputs with named estimation methods |
 | 7 | `experiments/`, `research/` | Matched-model evaluations, OOD suites, batch runs and honest reports |

@@ -415,13 +415,15 @@ function ModelStatus() {
       <div className="model-empty">
         <div className="latent-mark">◈</div>
         <div>
-          <strong>No model connected</strong>
-          <p>Evaluate trained models in Research.</p>
+          <strong>Explore learned futures</strong>
+          <p>Open the Prediction tab to select a trained model.</p>
         </div>
       </div>
       <div className="model-meta">
         <span>Prediction</span>
-        <span>Unavailable</span>
+        <button onClick={() => useLab.getState().set({ sidePanel: 'prediction' })}>
+          Open Prediction Lab →
+        </button>
       </div>
       <div className="model-meta">
         <span>Confidence</span>

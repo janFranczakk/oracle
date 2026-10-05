@@ -25,6 +25,8 @@ const world: WorldState = {
   playing: false,
   speed: 1,
   revision: 0,
+  generation: 'a'.repeat(32),
+  last_edit_tick: 0,
   objects: [body],
   collisions: [],
   seed: 42,
@@ -49,6 +51,8 @@ describe('Observation state', () => {
       playing: true,
       speed: 1,
       revision: 0,
+      generation: world.generation,
+      last_edit_tick: 0,
       collisions: ['a'],
       transforms: [
         {
@@ -85,7 +89,7 @@ describe('Observation state', () => {
     useLab.getState().receive(world);
     useLab.getState().set({ page: 'research' });
     expect(useLab.getState().world).toEqual(world);
-    expect('prediction' in useLab.getState()).toBe(false);
+    expect(useLab.getState().prediction).toBeNull();
   });
 });
 describe('Timeline mapping', () => {

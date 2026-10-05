@@ -6,7 +6,7 @@
 
 ORACLE studies the gap between what a controlled physical world does and what a learned dynamics model predicts. The intended workflow is observation → intervention → model prediction → ground-truth execution → measured error.
 
-**Stages 1–3 are implemented:** a deterministic 2D laboratory, reproducible datasets and real object-centric PyTorch MLP / GRU training. Research shows measured loss curves, verified checkpoint provenance and held-out rollout evaluation. The editable Lab continues to show ground truth; ghost trajectories enter in Stage 4.
+**Stages 1–4 are implemented:** a deterministic 2D laboratory, reproducible datasets, real object-centric PyTorch MLP / GRU training and the Prediction Lab. Research shows measured losses and held-out evaluation. The Lab renders learned ghost trajectories alongside a separate Pymunk future, with an independent forecast cursor, measured errors and provenance-rich JSON exports.
 
 ## Core idea
 
@@ -20,6 +20,7 @@ oracle/
 │   ├── oracle/        # physics, sessions, API, model contracts, dataset CLI
 │   │   ├── datasets/  # sampling, storage, train normalization, workers
 │   │   ├── models/    # shared object encoder, MLP / GRU, checkpoint-backed prediction
+│   │   ├── prediction/# real-history capture, isolated inference, replay reference, metrics
 │   │   └── training/  # sequences, optimization, checkpointing, metrics, evaluation
 │   ├── tests/         # deterministic replay and API tests
 │   ├── pyproject.toml
@@ -30,6 +31,7 @@ oracle/
 │   │   ├── api/       # HTTP and WebSocket transport
 │   │   ├── components/# object inspector
 │   │   ├── rendering/ # PixiJS scene and camera geometry
+│   │   ├── prediction/# model selection, ghost controls, measured forecast errors
 │   │   ├── research/  # dataset explorer, training dashboard, measured rollout charts
 │   │   ├── state/     # typed observation store
 │   │   └── timeline/  # recorded state scrubbing and transport
@@ -40,10 +42,11 @@ oracle/
 ├── datasets/         # generated collections, ignored by Git
 ├── STAGE_1_REPORT.md
 ├── STAGE_2_REPORT.md
-└── STAGE_3_REPORT.md
+├── STAGE_3_REPORT.md
+└── STAGE_4_REPORT.md
 ```
 
-[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3 report](STAGE_3_REPORT.md)
+[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Prediction Lab](docs/PREDICTION.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3](STAGE_3_REPORT.md) · [Stage 4 report](STAGE_4_REPORT.md)
 
 Contributor rules: [AGENTS.md](AGENTS.md) · [Git and review workflow](docs/REPOSITORY_WORKFLOW.md). Substantial changes use separate branches and Pull Requests into `main`. GitHub Actions checks the backend on Linux / Windows and the frontend tests, lint, formatting and production build.
 
@@ -61,11 +64,11 @@ Stage 3 implements object encoder → pooled scene context → shared temporal M
 
 ## Counterfactual reasoning
 
-Today you can pause, edit a body and observe the changed ground-truth world. Editing a past frame starts a new recording from that frame. Explicit counterfactual trees, immutable alternatives and learned future comparisons enter in Stage 5. Current replay trails are **recorded observations**, not predictions.
+You can pause, edit a body, collect fresh observations and compare its learned forecast with a physical future. Editing a past frame starts a new recording from that frame. Explicit counterfactual trees, immutable alternatives and intervention-conditioned models enter in Stage 5. Neutral replay trails are **recorded observations**; violet ghosts are learned outputs; cyan future traces are the separately executed Pymunk reference.
 
 ## Prediction pipeline
 
-Available in Research / CLI: frame history → trained weights → autoregressive rollout → errors against held-out observations. The checkpoint-backed adapter returns model-attributed frames without simulator calls. Stage 4 connects these outputs to the Lab's ghost trajectory layer. Intervention conditioning and uncertainty remain later work. The Lab still displays “No model connected” because its prediction UI is not connected yet.
+In the Lab: paused real observation history → verified trained weights → autoregressive rollout → violet ghosts / separate forecast cursor → measured errors against an independently replayed Pymunk reference. Both futures hold the anchor's conditions and leave live physics untouched. Inference runs in a bounded CPU subprocess; stale anchors are rejected. Research / CLI retain separate held-out evaluation. Intervention conditioning and uncertainty remain later work. [Pipeline and measurement contract](docs/PREDICTION.md).
 
 ## Screenshots
 
@@ -87,7 +90,9 @@ Screenshot reserved for Stage 5. Branches are not yet implemented.
 
 ### Predicted vs Actual
 
-Screenshot reserved for Stage 4. No learned predictions are shown in Stage 1.
+![Stage 4 learned ghosts and measured errors](docs/screenshots/stage4-prediction-1440.jpg)
+
+[1920×1080 verification](docs/screenshots/stage4-prediction-1920.jpg) · [Real-history preparation](docs/screenshots/stage4-preparation-1440.jpg)
 
 ### Training Dashboard
 
@@ -109,6 +114,8 @@ Screenshot reserved for Stage 4. No learned predictions are shown in Stage 1.
 10. Inspect train / validation / test / OOD episodes. Scrub their observed timeline, select a specimen, compare initial mass / speed distributions and inspect normalization provenance.
 11. Open **Research → World model**, choose MLP or GRU, a dataset, training seed, epoch count and observed history. **Train world model** launches real optimization in a separate worker.
 12. Inspect logged losses and the validation-selected checkpoint. Choose test / OOD groups and rollout horizons, compare with the constant-velocity reference, and export evaluation JSON.
+13. Return to **Lab → Prediction**, select a completed model and pause the world. **Record observations** collects the real history needed by its sampling clock.
+14. Choose the horizon and **Predict future**. Scrub the separate forecast, compare violet learned ghosts / cyan Pymunk actual, select a body and inspect measured errors. Expand **Forecast settings** to change model / horizon; export the actual report JSON. Edits, seeks and real playback clear stale predictions.
 
 ## Installation
 
@@ -210,7 +217,7 @@ An experiment contains schema and engine versions, a null model version, timesta
 
 ## Metrics
 
-The Lab displays physical state and **translational kinetic energy** from observations; it excludes rotational energy. Research reports real learned-model errors in physical units, contact classification with class counts and errors versus numeric horizons. Undefined classification ratios remain null. See [metric definitions](docs/TRAINING.md#evaluation-definitions). Uncertainty is not estimated in Stage 3.
+The Lab displays observed physical state and **translational kinetic energy**, excluding rotational energy. Prediction reports dynamic-object ADE / FDE, position / velocity MSE, periodic rotation error and contact-onset counts against a separate physical future. Research retains held-out test / OOD evaluation. Undefined classification ratios remain null. See [forecast metrics](docs/PREDICTION.md#metrics) and [research metrics](docs/TRAINING.md#evaluation-definitions). Uncertainty remains unestimated.
 
 ## Roadmap
 
@@ -219,7 +226,7 @@ The Lab displays physical state and **translational kinetic energy** from observ
 | 1 | Physics foundation and polished visual sandbox | Implemented and verified |
 | 2 | Dataset engine, splits, normalization, data explorer | Implemented and verified |
 | 3 | Object encoder, MLP / GRU, training, validation and rollout evaluation | Implemented and verified |
-| 4 | Learned rollout, ghost futures and prediction error | Planned |
+| 4 | Learned rollout, ghost futures and prediction error | Implemented and verified |
 | 5 | Interventions, branch trees and comparative futures | Planned |
 | 6 | Transformer, object attention and uncertainty | Planned |
 | 7 | Model comparison, OOD suites and batch reports | Planned |
@@ -227,7 +234,7 @@ The Lab displays physical state and **translational kinetic energy** from observ
 
 ## Limitations
 
-Local prototype: no accounts, remote hosting or persistent session database. Dataset collection and training use separate processes. Browser snapshots are limited to eight; export important experiments. Recordings stop at 120 simulated seconds, scenes support 64 objects and experiments 512 edits. Seeks replay from the start. Use ordinary speeds and avoid heavy initial overlaps. The learned models are small baselines: some metrics improve while others are worse than constant velocity, and OOD / long-horizon drift remains substantial. CUDA training is available as a guarded option but was not verified. Checkpoints remain local; UI cancellation / resume, Lab ghost trajectories, branching, advanced model comparison, uncertainty and 3D are future work. Stage reports record actual verification coverage.
+Local prototype: no accounts, remote hosting or persistent session database. Collection, training and inference use separate processes. Browser snapshots are limited to eight; export important experiments. Recordings stop at 120 simulated seconds, scenes support 64 objects and experiments 512 edits. Seeks replay from the start. Predictions require compatible real history after edits, support up to 120 observed future steps and time out after 45 seconds. Each request starts a fresh CPU worker; startup latency remains. The physical reference ignores edits recorded after its anchor. Use ordinary speeds and avoid heavy initial overlaps. Small learned baselines have substantial OOD / long-horizon drift; Lab scenes are not certified in-distribution. CUDA training is guarded but unverified. Checkpoints remain local; UI training cancellation / resume, intervention branches, advanced comparison, uncertainty and 3D are future work. Stage reports record actual verification coverage.
 
 ## Research questions
 

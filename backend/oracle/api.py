@@ -2,6 +2,7 @@
 
 import asyncio
 import contextlib
+import importlib.util
 import math
 import time
 from contextlib import asynccontextmanager
@@ -12,7 +13,11 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import Field, ValidationError
 
+from oracle.datasets.api import PROJECT_ROOT
 from oracle.datasets.api import router as dataset_router
+from oracle.prediction.context import capture, matches
+from oracle.prediction.schema import PredictionRequest
+from oracle.prediction.service import PredictionService
 from oracle.scenes import scene
 from oracle.session import Session
 from oracle.training.api import router as training_router
@@ -21,6 +26,7 @@ from oracle.world import BodyState, EditEvent, Experiment, StrictModel
 sessions: dict[str, Session] = {}
 clients: dict[str, set[WebSocket]] = {}
 last_revision: dict[str, int] = {}
+predictions = PredictionService(PROJECT_ROOT / "checkpoints")
 
 
 async def broadcast(session_id: str, full: bool = True) -> None:
@@ -73,7 +79,7 @@ async def lifespan(_app: FastAPI):
         await task
 
 
-app = FastAPI(title="ORACLE · Research API", version="0.3.0", lifespan=lifespan)
+app = FastAPI(title="ORACLE · Research API", version="0.4.0", lifespan=lifespan)
 app.include_router(dataset_router)
 app.include_router(training_router)
 app.add_middleware(
@@ -113,7 +119,9 @@ def health() -> dict:
         "engine": "pymunk-7.2.0",
         "tick_hz": 120,
         "stream_hz": 20,
-        "model_available": False,
+        "prediction_available": importlib.util.find_spec("torch") is not None,
+        "model_available": bool(predictions.catalog.list()["models"])
+        and importlib.util.find_spec("torch") is not None,
     }
 
 
@@ -187,6 +195,39 @@ def history(sid: str) -> dict:
     if indices[-1] != session.duration:
         indices.append(session.duration)
     return {"frames": [session.history[i].model_dump() for i in indices]}
+
+
+@app.get("/api/prediction/models")
+def prediction_models() -> dict:
+    return {
+        **predictions.catalog.list(),
+        "torch_available": importlib.util.find_spec("torch") is not None,
+    }
+
+
+@app.post("/api/sessions/{sid}/predict")
+async def predict(sid: str, request: PredictionRequest) -> dict:
+    session = get_session(sid)
+    if importlib.util.find_spec("torch") is None:
+        raise HTTPException(503, "Install the documented ML dependencies before predicting.")
+    try:
+        model = predictions.catalog.describe(request.model_id)
+        context = capture(session, request, model)
+        result = await asyncio.to_thread(predictions.run, context)
+    except RuntimeError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except (ValueError, KeyError, TypeError, OSError) as exc:
+        detail = (
+            str(exc)
+            if isinstance(exc, ValueError) and not isinstance(exc, ValidationError)
+            else "This checkpoint is unavailable or incompatible. Refresh models."
+        )
+        raise HTTPException(422, detail) from exc
+    if sessions.get(sid) is not session or not matches(session, request):
+        raise HTTPException(
+            409, "The world changed during prediction. Predict again from its current state."
+        )
+    return result
 
 
 @app.get("/api/sessions/{sid}/export")
