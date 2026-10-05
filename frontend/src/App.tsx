@@ -25,6 +25,8 @@ import { useLab } from './state/lab';
 import { WorldViewport } from './rendering/WorldViewport';
 import { Inspector } from './components/Inspector';
 import { Timeline } from './timeline/Timeline';
+import { PredictionPanel } from './prediction/PredictionPanel';
+import { ForecastTimeline } from './prediction/ForecastTimeline';
 import type { Body, Command, Experiment, Scene, Shape } from './types';
 
 type Snapshot = { id: string; name: string; data: Experiment };
@@ -57,6 +59,9 @@ export function App() {
     busy = useLab((s) => s.busy),
     error = useLab((s) => s.error);
   const trails = useLab((s) => s.trails);
+  const sidePanel = useLab((s) => s.sidePanel);
+  const prediction = useLab((s) => s.prediction);
+  const selectedId = useLab((s) => s.selectedId);
   const revision = world?.revision;
   const [modal, setModal] = useState<'scene' | 'snapshots' | 'about' | null>(null);
   const [addMenu, setAddMenu] = useState(false),
@@ -179,7 +184,7 @@ export function App() {
 
   const command = useCallback(async (cmd: Command) => {
     const store = useLab.getState();
-    if (!store.sessionId || store.connection !== 'online' || inFlight.current) return;
+    if (!store.sessionId || store.connection !== 'online' || store.busy || inFlight.current) return;
     inFlight.current = true;
     store.set({
       busy: cmd.kind === 'seek' ? 'Replaying observation' : 'Updating world',
@@ -348,7 +353,7 @@ export function App() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   const disabled = connection !== 'online' || !!busy;
-  const selected = world?.objects.find((o) => o.id === useLab.getState().selectedId);
+  const selected = world?.objects.find((o) => o.id === selectedId);
   const moving = world?.objects.filter((o) => !o.static) || [];
   const kinetic = moving.reduce(
     (sum, o) => sum + 0.5 * o.mass * (o.velocity.x ** 2 + o.velocity.y ** 2),
@@ -362,7 +367,7 @@ export function App() {
           <img src="/oracle.svg" alt="" />
           <div>
             <strong>
-              ORACLE<span className="brand-version"> / 03</span>
+              ORACLE<span className="brand-version"> / 04</span>
             </strong>
             <span>COUNTERFACTUAL PHYSICS LAB</span>
           </div>
@@ -392,7 +397,7 @@ export function App() {
                 ? 'CONNECTING'
                 : 'ENGINE OFFLINE'}
           </span>
-          <span className="version-pill">v0.3.0</span>
+          <span className="version-pill">v0.4.0</span>
         </div>
       </header>
       <div className="app-body">
@@ -440,7 +445,7 @@ export function App() {
               <div className="workspace-heading">
                 <div>
                   <div className="breadcrumb">
-                    WORKSPACE <span>/</span> PHYSICS FOUNDATION
+                    WORKSPACE <span>/</span> PREDICTION LAB
                   </div>
                   <h1>
                     {world ? sceneTitles[world.scene] : 'Your physics laboratory'}
@@ -543,6 +548,7 @@ export function App() {
                       </span>
                     </div>
                   </div>
+                  <ForecastTimeline />
                   <Timeline command={command} />
                   <div className="lab-footnote">
                     <span>
@@ -551,15 +557,44 @@ export function App() {
                     </span>
                     <span className="future-legend">
                       <span className="legend-line violet-line" />
-                      Learned future <span className="tag">NOT CONNECTED</span>
+                      Learned future{' '}
+                      <span className="tag violet">
+                        {prediction
+                          ? prediction.model.architecture.family.toUpperCase()
+                          : 'READY TO CONNECT'}
+                      </span>
                     </span>
                     <span className="lab-footnote-right">
-                      Observation precedes prediction.
+                      {prediction
+                        ? `Forecast anchored at t${prediction.anchor.tick}`
+                        : 'Observation precedes prediction.'}
                       <ArrowRight size={13} />
                     </span>
                   </div>
                 </div>
-                <Inspector command={command} duplicate={duplicate} />
+                <div className="lab-sidebar">
+                  <div className="lab-sidebar-tabs" role="tablist" aria-label="Lab tools">
+                    <button
+                      role="tab"
+                      aria-selected={sidePanel === 'prediction'}
+                      onClick={() => useLab.getState().set({ sidePanel: 'prediction' })}
+                    >
+                      Prediction
+                    </button>
+                    <button
+                      role="tab"
+                      aria-selected={sidePanel === 'object'}
+                      onClick={() => useLab.getState().set({ sidePanel: 'object' })}
+                    >
+                      Object inspector
+                    </button>
+                  </div>
+                  {sidePanel === 'prediction' ? (
+                    <PredictionPanel command={command} />
+                  ) : (
+                    <Inspector command={command} duplicate={duplicate} />
+                  )}
+                </div>
               </div>
             </>
           ) : (
@@ -810,7 +845,8 @@ export function App() {
                     <strong>Learned dynamics · Research</strong>
                     <p>
                       Train object-centric models and inspect their measured errors in Research.
-                      Ghost trajectories in the Lab follow in Stage 4.
+                      Predict from real observations in the Lab, inspect violet ghosts and compare
+                      them with a separate Pymunk replay.
                     </p>
                   </div>
                 </div>

@@ -24,6 +24,8 @@ export type WorldState = Frame & {
   playing: boolean;
   speed: number;
   revision: number;
+  generation: string;
+  last_edit_tick: number;
   seed: number;
   scene: Scene;
   environment: { width: number; height: number; gravity: Vec2; dt: number; iterations: number };
@@ -39,6 +41,8 @@ export type FrameMessage = {
   playing: boolean;
   speed: number;
   revision: number;
+  generation: string;
+  last_edit_tick: number;
   transforms: Transform[];
   collisions: string[];
 };
@@ -59,11 +63,4 @@ export type Experiment = {
   origin: { seed: number; scene: Scene; objects: Body[] };
   playhead: number;
   duration: number;
-};
-// Future model responses have a separate source; a physics frame is never an AI prediction.
-export type Prediction = {
-  source: 'learned_model';
-  modelVersion: string;
-  frames: Frame[];
-  uncertainty?: { method: string; positionStd: Vec2[][] };
 };

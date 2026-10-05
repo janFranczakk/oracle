@@ -15,6 +15,7 @@ import type { Body, Command, Vec2 } from '../types';
 import { useLab } from '../state/lab';
 import { hitTest, scaleFor, screenToWorld, worldToScreen } from './coordinates';
 import type { Camera } from './coordinates';
+import { frameAt, ghostAlpha, ghostSteps, pairedBodies, trajectory } from '../prediction/forecast';
 
 type Props = { command: (value: Command) => Promise<void> };
 const HOME: Camera = { x: 12, y: 6.6, zoom: 1 };
@@ -63,6 +64,26 @@ function bodyGraphic(body: Body) {
   return g;
 }
 
+function ghostGraphic(body: Body, color: number, alpha: number, active = false) {
+  const g = new Graphics();
+  const factor = body.shape === 'circle' ? CURVE_SCALE : 1;
+  g.scale.set(1 / factor);
+  if (body.shape === 'circle') {
+    g.circle(0, 0, body.radius * factor);
+  } else g.rect(-body.width / 2, -body.height / 2, body.width, body.height);
+  g.fill({ color, alpha: alpha * 0.2 }).stroke({
+    color,
+    alpha,
+    width: (active ? 0.045 : 0.025) * factor,
+  });
+  g.moveTo(0, 0)
+    .lineTo((body.shape === 'circle' ? body.radius * factor : body.width / 2) * 0.7, 0)
+    .stroke({ color, alpha: alpha * 0.6, width: 0.018 * factor });
+  g.position.set(body.position.x, body.position.y);
+  g.rotation = body.rotation;
+  return g;
+}
+
 export function WorldViewport({ command }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const cameraRef = useRef({ ...HOME });
@@ -75,6 +96,10 @@ export function WorldViewport({ command }: Props) {
     connection = useLab((s) => s.connection);
   const selected = useLab((s) => s.selectedId),
     follow = useLab((s) => s.follow);
+  const prediction = useLab((s) => s.prediction);
+  const ghosts = useLab((s) => s.ghosts),
+    reference = useLab((s) => s.reference),
+    errorVectors = useLab((s) => s.errorVectors);
 
   useEffect(() => {
     const element = host.current;
@@ -90,6 +115,10 @@ export function WorldViewport({ command }: Props) {
     const selection = new Graphics(),
       preview = new Graphics(),
       impacts = new Graphics();
+    const forecastPaths = new Graphics(),
+      gaps = new Graphics(),
+      forecastBodies = new Container();
+    let lastForecast = '';
     impacts.scale.set(1 / CURVE_SCALE);
     const objects = new Map<string, { g: Graphics; label: Text; signature: string }>();
     const target = cameraRef.current;
@@ -126,7 +155,7 @@ export function WorldViewport({ command }: Props) {
       if (hit) state.select(hit.id);
       else if (e.button === 0 && !e.altKey) state.select(null);
       drag = {
-        id: hit && !state.world?.playing ? hit.id : null,
+        id: hit && !state.world?.playing && !state.busy ? hit.id : null,
         start: p,
         camera: { x: target.x, y: target.y },
         moved: false,
@@ -191,7 +220,18 @@ export function WorldViewport({ command }: Props) {
           return;
         }
         element.appendChild(app.canvas);
-        root.addChild(gridLines, trajectories, bodies, vectorsLayer, preview, selection, impacts);
+        root.addChild(
+          gridLines,
+          trajectories,
+          forecastPaths,
+          forecastBodies,
+          gaps,
+          bodies,
+          vectorsLayer,
+          preview,
+          selection,
+          impacts,
+        );
         app.stage.addChild(root, labels);
         app.ticker.add(() => {
           const s = useLab.getState(),
@@ -218,6 +258,65 @@ export function WorldViewport({ command }: Props) {
           const scale = scaleFor(width, height, camera.zoom);
           root.scale.set(scale, -scale);
           root.position.set(width / 2 - camera.x * scale, height / 2 + camera.y * scale);
+          const prediction = s.prediction;
+          const forecastKey = `${prediction?.created_at}-${s.forecastStep}-${s.selectedId}-${s.ghosts}-${s.reference}-${s.errorVectors}`;
+          if (forecastKey !== lastForecast) {
+            lastForecast = forecastKey;
+            forecastPaths.clear();
+            gaps.clear();
+            for (const child of forecastBodies.removeChildren()) child.destroy();
+            if (prediction) {
+              const dynamic = prediction.anchor_frame.objects.filter((body) => !body.static);
+              for (const body of dynamic) {
+                const focus = !s.selectedId || body.id === s.selectedId;
+                for (const actual of [false, true]) {
+                  if (actual ? !s.reference : !s.ghosts) continue;
+                  const points = trajectory(prediction, body.id, actual);
+                  forecastPaths.moveTo(points[0].x, points[0].y);
+                  for (const point of points.slice(1)) forecastPaths.lineTo(point.x, point.y);
+                  forecastPaths.stroke({
+                    color: actual ? 0x93e3eb : 0xa79ad7,
+                    width: actual ? 0.025 : 0.04,
+                    alpha: focus ? (actual ? 0.4 : 0.65) : 0.16,
+                  });
+                }
+              }
+              if (s.ghosts)
+                for (const step of ghostSteps(prediction.horizon)) {
+                  for (const body of frameAt(prediction, step).objects.filter(
+                    (body) => !body.static,
+                  ))
+                    forecastBodies.addChild(
+                      ghostGraphic(
+                        body,
+                        0xa79ad7,
+                        ghostAlpha(step, prediction.horizon) *
+                          (!s.selectedId || s.selectedId === body.id ? 1 : 0.4),
+                      ),
+                    );
+                }
+              for (const pair of pairedBodies(prediction, s.forecastStep)) {
+                const focus = !s.selectedId || pair.actual.id === s.selectedId;
+                if (s.ghosts)
+                  forecastBodies.addChild(
+                    ghostGraphic(pair.predicted, 0xc3b6f1, focus ? 0.85 : 0.28, true),
+                  );
+                if (s.reference)
+                  forecastBodies.addChild(
+                    ghostGraphic(pair.actual, 0x93e3eb, focus ? 0.75 : 0.25, true),
+                  );
+                if (s.errorVectors && s.forecastStep > 0) {
+                  const a = pair.actual.position,
+                    p = pair.predicted.position;
+                  gaps
+                    .moveTo(a.x, a.y)
+                    .lineTo(p.x, p.y)
+                    .stroke({ color: 0xdfb978, width: 0.025, alpha: focus ? 0.8 : 0.15 });
+                  gaps.circle(p.x, p.y, 0.065).fill({ color: 0xdfb978, alpha: focus ? 0.8 : 0.15 });
+                }
+              }
+            }
+          }
           const gridKey = `${s.grid}-${width}-${height}-${Math.round(camera.zoom * 100)}`;
           if (gridKey !== lastGrid) {
             lastGrid = gridKey;
@@ -430,6 +529,28 @@ export function WorldViewport({ command }: Props) {
         </div>
         <span className="scene-scale">24 × 14 m</span>
       </div>
+      {prediction && (
+        <div className="forecast-legend">
+          {ghosts && (
+            <span>
+              <i />
+              Learned future
+            </span>
+          )}
+          {reference && (
+            <span className="truth">
+              <i />
+              Pymunk actual
+            </span>
+          )}
+          {errorVectors && (
+            <span className="error">
+              <i />
+              Position gap
+            </span>
+          )}
+        </div>
+      )}
       <div className="viewport-caption">
         <span className="eyebrow">EXPERIMENT 001</span>
         <h2>A world in motion.</h2>
