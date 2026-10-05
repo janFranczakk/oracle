@@ -165,9 +165,9 @@ def test_duplicate_world_ids_rejected():
         World(seed=42, objects=[world.objects[0], world.objects[0]])
 
 
-def test_no_physics_powered_prediction_endpoint():
+def test_no_unattributed_prediction_endpoint():
     with TestClient(app) as client:
-        assert client.get("/api/health").json()["model_available"] is False
+        assert "prediction_available" in client.get("/api/health").json()
         assert client.post("/api/predict", json={}).status_code == 404
 
 
