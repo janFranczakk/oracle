@@ -26,7 +26,7 @@ class LearnedDynamics:
         self, history: tuple[Frame, ...], intervention: Intervention | None, horizon: int
     ) -> Prediction:
         if intervention is not None:
-            raise ValueError("Intervention conditioning enters in Stage 5")
+            raise ValueError("Use the Counterfactual Lab's explicit derived-history conditioning")
         count = self.model.config.history
         if len(history) < count or not 1 <= horizon <= 240:
             raise ValueError(

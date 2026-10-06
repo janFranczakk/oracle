@@ -60,7 +60,18 @@ export type Experiment = {
   engine: string;
   model_version: null;
   created_at: string;
-  origin: { seed: number; scene: Scene; objects: Body[] };
+  origin: {
+    seed: number;
+    scene: Scene;
+    objects: Body[];
+    environment: WorldState['environment'];
+  };
+  events: {
+    tick: number;
+    kind: 'upsert' | 'remove';
+    object: Body | null;
+    object_id: string | null;
+  }[];
   playhead: number;
   duration: number;
 };

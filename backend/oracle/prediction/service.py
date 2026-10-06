@@ -16,13 +16,26 @@ class PredictionService:
         self.lock = threading.Lock()
 
     def run(self, context: dict) -> dict:
+        checkpoint = self.catalog.checkpoint(context["model"]["id"])
+        return self._execute(context, ["-m", "oracle.predict", "--checkpoint", str(checkpoint)])
+
+    def run_counterfactual(self, context: dict) -> dict:
+        args = ["-m", "oracle.counterfactual.worker"]
+        if context["operation"] == "predict":
+            checkpoint = self.catalog.checkpoint(context["model"]["id"])
+            args.extend(["--checkpoint", str(checkpoint)])
+        return self._execute(context, args)
+
+    def _execute(self, context: dict, args: list[str]) -> dict:
         if not self.lock.acquire(blocking=False):
             raise RuntimeError("Another prediction is running. Try again when it finishes.")
         try:
-            checkpoint = self.catalog.checkpoint(context["model"]["id"])
+            payload = json.dumps(context, allow_nan=False)
+            if len(payload.encode("utf-8")) > 2 * 1024 * 1024:
+                raise ValueError("Worker input exceeds the 2 MiB execution limit")
             result = subprocess.run(
-                [sys.executable, "-m", "oracle.predict", "--checkpoint", str(checkpoint)],
-                input=json.dumps(context, allow_nan=False),
+                [sys.executable, *args],
+                input=payload,
                 text=True,
                 encoding="utf-8",
                 capture_output=True,

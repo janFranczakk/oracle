@@ -1,0 +1,11 @@
+# Stage 5 — Counterfactual Lab requirements
+
+1. Capture a paused, immutable source snapshot with the original experiment and journal through its anchor. Preserve the live session, including its later recorded future.
+2. Create a bounded branch tree. Children inherit their parent's interventions at the same source tick; they do not treat predicted states as observations. Support material / motion / transform edits, removal, duplication and insertion, including static obstacles.
+3. Preview interventions before committing a branch. Saved branches are immutable; changing an alternative creates a child or sibling.
+4. Predict using verified MLP / GRU weights in a bounded subprocess. Keep original observations and derived conditioning inputs separate. Describe terminal overrides, removed identity projection and explicitly synthetic anchor placeholders for new bodies. These baselines have no intervention-specific training or calibrated uncertainty.
+5. Run Pymunk reality only on explicit request, in an isolated subprocess. Rebuild solver caches by replay, apply exactly the branch's interventions, then execute the same clock and horizon. No live-world mutation and no reference feedback into learned inference.
+6. Inspect multiple alternatives with a shared sampled cursor, overlay / split comparison, trajectories, selected-object gaps and measured prediction errors only after compatible reality exists. Different object sets must be compared by common dynamic identities, with additions / removals identified.
+7. Save source / branch plans locally, export provenance-rich reports, and import validated plans without trusting imported metrics. Existing experiment schema 1, training artifacts, Prediction Lab, editor and Research remain compatible.
+8. Test cloning, nested / sibling isolation, graph and input bounds, source replay validation, intervention conditioning, operation separation, stale / incompatible comparisons and worker failures. Run the complete configured CI gate.
+9. Verify real browser flows at 1440×900 and 1920×1080, save screenshots and publish `STAGE_5_REPORT.md` with actual results and limitations. Deliver logical commits and a Pull Request; do not merge automatically.
