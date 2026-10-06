@@ -82,7 +82,7 @@ export function Research() {
           </div>
           <div className="roadmap-grid">
             {stages.map(([number, title, desc, Icon], i) => (
-              <div className={`roadmap-card ${i < 7 ? 'ready' : ''}`} key={number}>
+              <div className={`roadmap-card ${i < 8 ? 'ready' : ''}`} key={number}>
                 <div>
                   <Icon size={20} />
                   <span>{number}</span>
@@ -90,12 +90,12 @@ export function Research() {
                 <h3>{title}</h3>
                 <p>{desc}</p>
                 <span className="roadmap-status">
-                  {i < 7 ? (
+                  {i < 8 ? (
                     <>
                       <Check size={12} />
                       IMPLEMENTED
                     </>
-                  ) : i === 7 ? (
+                  ) : i === 8 ? (
                     'NEXT STAGE'
                   ) : (
                     'PLANNED'

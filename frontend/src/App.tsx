@@ -18,6 +18,7 @@ import {
   Save,
   Square,
   Trash2,
+  Target,
   Upload,
   X,
 } from 'lucide-react';
@@ -40,6 +41,9 @@ const CounterfactualLab = lazy(() =>
   })),
 );
 const SNAPSHOTS_KEY = 'oracle.snapshots.v1';
+const PlanningLab = lazy(() =>
+  import('./planning/PlanningLab').then((m) => ({ default: m.PlanningLab })),
+);
 const sceneTitles: Record<Scene, string> = {
   incline: 'The inclined plane',
   collision: 'Collision chamber',
@@ -373,7 +377,7 @@ export function App() {
           <img src="/oracle.svg" alt="" />
           <div>
             <strong>
-              ORACLE<span className="brand-version"> / 07</span>
+              ORACLE<span className="brand-version"> / 08</span>
             </strong>
             <span>COUNTERFACTUAL PHYSICS LAB</span>
           </div>
@@ -400,6 +404,13 @@ export function App() {
             <FlaskConical size={15} />
             Research<span className="nav-tag">ML</span>
           </button>
+          <button
+            className={page === 'planning' ? 'selected' : ''}
+            onClick={() => useLab.getState().set({ page: 'planning' })}
+          >
+            <Target size={15} />
+            Planning
+          </button>
         </nav>
         <div className="header-status">
           <span className={`connection-dot ${connection}`} />
@@ -410,7 +421,7 @@ export function App() {
                 ? 'CONNECTING'
                 : 'ENGINE OFFLINE'}
           </span>
-          <span className="version-pill">v0.7.0</span>
+          <span className="version-pill">v0.8.0</span>
         </div>
       </header>
       <div className="app-body">
@@ -619,6 +630,16 @@ export function App() {
               }
             >
               <CounterfactualLab />
+            </Suspense>
+          ) : page === 'planning' ? (
+            <Suspense
+              fallback={
+                <div className="research-page" role="status">
+                  Loading planning workspace…
+                </div>
+              }
+            >
+              <PlanningLab />
             </Suspense>
           ) : (
             <Suspense
