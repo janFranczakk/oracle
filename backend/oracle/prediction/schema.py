@@ -3,10 +3,11 @@
 from pydantic import Field, model_validator
 
 from oracle.models.schema import ModelConfig
+from oracle.prediction.uncertainty import SamplingOptions
 from oracle.world import Scalar, StrictModel
 
 
-class PredictionRequest(StrictModel):
+class PredictionRequest(SamplingOptions):
     model_id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,80}$")
     generation: str = Field(pattern=r"^[a-f0-9]{32}$")
     anchor_tick: int = Field(ge=0, le=14400)

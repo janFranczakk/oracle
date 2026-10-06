@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from oracle.counterfactual.schema import AnchorRequest, Branch, Change, CreateBranch, Plan, Snapshot
 from oracle.prediction.metrics import compare
+from oracle.prediction.uncertainty import measure_intervals
 from oracle.session import Session
 from oracle.world import EditEvent, Frame
 
@@ -161,6 +162,11 @@ class PlanStore:
         return {
             "model_sha256": prediction["model"]["sha256"],
             "branch_sha256": prediction["branch_sha256"],
+            "uncertainty_measurement": measure_intervals(
+                prediction["uncertainty"], [Frame.model_validate(f) for f in reality["frames"]]
+            )
+            if prediction.get("uncertainty")
+            else None,
             "metrics": compare(
                 [Frame.model_validate(f) for f in prediction["frames"]],
                 [Frame.model_validate(f) for f in reality["frames"]],

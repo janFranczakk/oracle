@@ -37,7 +37,7 @@ def trained(tmp_path_factory):
     generate_dataset(
         DatasetConfig(train=2, validation=1, test=1, ood_per_suite=1, steps=24), root / "data"
     )
-    for family in ("mlp", "gru"):
+    for family in ("mlp", "gru", "transformer"):
         train(
             root / "data",
             root / family,
@@ -81,6 +81,28 @@ def context(plan, branch, operation="reality", service=None, family="gru", horiz
     if operation == "predict":
         value["model"] = service.catalog.describe(family).model_dump(mode="json")
     return value
+
+
+def test_transformer_branch_intervals_are_scored_only_after_matching_reality(trained):
+    session, original = source()
+    store = PlanStore()
+    described = store.put("owner", original)
+    plan = Plan.model_validate(described["plan"])
+    plan, branch = add_branch(store, plan, [update(mass=8)])
+    value = context(plan, branch, "predict", trained, "transformer")
+    value["request"].update(samples=16, sampling_seed=9)
+    predicted = execute(value, trained.catalog.checkpoint("transformer"))
+    assert predicted["uncertainty"]["seed"] == 9
+    assert "measurement" not in predicted["uncertainty"]
+    assert predicted["attention"]["object_ids"] == [
+        b.id for b in materialize(plan, branch)[0].objects
+    ]
+    assert store.record_future("owner", predicted) is None
+    reality = execute(context(plan, branch, "reality"))
+    comparison = store.record_future("owner", reality)
+    assert comparison["uncertainty_measurement"]["objects_scored"] == 20
+    assert reality["uncertainty"] is None
+    assert session.engine.tick == original.snapshot.frame.tick
 
 
 def test_snapshot_seek_keeps_live_future_and_nested_siblings_are_isolated():

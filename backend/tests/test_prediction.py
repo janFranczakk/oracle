@@ -36,7 +36,7 @@ def models(tmp_path_factory):
     generate_dataset(
         DatasetConfig(train=2, validation=1, test=1, ood_per_suite=1, steps=24), root / "data"
     )
-    for family in ("mlp", "gru"):
+    for family in ("mlp", "gru", "transformer"):
         train(
             root / "data",
             root / family,
@@ -61,7 +61,7 @@ def request_for(session, model="gru", horizon=5):
     )
 
 
-@pytest.mark.parametrize("family", ["mlp", "gru"])
+@pytest.mark.parametrize("family", ["mlp", "gru", "transformer"])
 def test_real_forecast_preserves_world_and_uses_checkpoint(models, family):
     session = Session()
     session.advance(12)
@@ -81,6 +81,29 @@ def test_real_forecast_preserves_world_and_uses_checkpoint(models, family):
     for frame in result["frames"]:
         assert [b["id"] for b in frame["objects"]] == [b.id for b in session.engine.frame().objects]
         assert all(math.isfinite(b["position"]["x"]) for b in frame["objects"])
+
+
+def test_transformer_worker_returns_real_seeded_intervals_and_measured_coverage(models):
+    session = Session()
+    session.advance(12)
+    service = PredictionService(models)
+    request = request_for(session, "transformer").model_copy(
+        update={"samples": 16, "sampling_seed": 23}
+    )
+    context = capture(session, request, service.catalog.describe("transformer"))
+    result = service.run(context)
+    repeat = service.run(context)
+    assert result["uncertainty"] == repeat["uncertainty"]
+    assert result["attention"] == repeat["attention"]
+    assert result["uncertainty"]["samples"] == 16
+    assert result["uncertainty"]["calibrated"] is False
+    assert 0 <= result["uncertainty"]["measurement"]["coverage_xy"] <= 1
+    assert result["uncertainty"]["measurement"]["objects_scored"] == 20
+    assert result["attention"]["causal_explanation"] is False
+    point_context = capture(
+        session, request_for(session, "transformer"), service.catalog.describe("transformer")
+    )
+    assert service.run(point_context)["frames"] == result["frames"]
 
 
 def test_worker_process_and_api_import_boundary(models):
@@ -170,7 +193,11 @@ def test_model_catalog_rejects_missing_provenance_and_paths(models, tmp_path):
     for identity in ("../gru", "gru/../../secret", "missing"):
         with pytest.raises(ValueError):
             catalog.checkpoint(identity)
-    assert len(catalog.list()["models"]) == 2
+    assert {m["architecture"]["family"] for m in catalog.list()["models"]} == {
+        "mlp",
+        "gru",
+        "transformer",
+    }
     import shutil
 
     shutil.copytree(models / "gru", tmp_path / "bad")

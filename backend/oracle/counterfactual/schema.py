@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
+from oracle.prediction.uncertainty import SamplingOptions
 from oracle.world import BodyState, Experiment, Frame, Scalar, StrictModel, Vec2
 
 
@@ -107,7 +108,7 @@ class CreateBranch(StrictModel):
     changes: list[Change] = Field(min_length=1, max_length=4)
 
 
-class ExecutionRequest(StrictModel):
+class ExecutionRequest(SamplingOptions):
     horizon: int = Field(default=50, ge=1, le=120)
     sample_stride: int = Field(default=4, ge=1, le=120)
     model_id: str | None = Field(default=None, pattern=r"^[a-zA-Z0-9_-]{1,80}$")
