@@ -15,8 +15,8 @@ from pydantic import Field, ValidationError
 
 from oracle.counterfactual.api import create_router as counterfactual_router
 from oracle.counterfactual.plans import PlanStore
-from oracle.datasets.api import PROJECT_ROOT
 from oracle.datasets.api import router as dataset_router
+from oracle.paths import ARTIFACT_ROOT
 from oracle.planning.api import create_router as planning_router
 from oracle.planning.store import PlanningStore
 from oracle.prediction.context import capture, matches
@@ -31,7 +31,7 @@ from oracle.world import BodyState, EditEvent, Experiment, StrictModel
 sessions: dict[str, Session] = {}
 clients: dict[str, set[WebSocket]] = {}
 last_revision: dict[str, int] = {}
-predictions = PredictionService(PROJECT_ROOT / "checkpoints")
+predictions = PredictionService(ARTIFACT_ROOT / "checkpoints")
 counterfactuals = PlanStore()
 planning = PlanningStore()
 

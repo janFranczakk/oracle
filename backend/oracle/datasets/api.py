@@ -19,8 +19,8 @@ from oracle.datasets.storage import (
     read_normalization,
     write_json,
 )
+from oracle.paths import ARTIFACT_ROOT, PROJECT_ROOT
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
 router = APIRouter(prefix="/api/datasets", tags=["Ground-truth datasets"])
 
 
@@ -141,7 +141,7 @@ class DatasetService:
             return self.status(job_id)
 
 
-service = DatasetService(PROJECT_ROOT / "datasets")
+service = DatasetService(ARTIFACT_ROOT / "datasets")
 
 
 def fail(exc: Exception) -> HTTPException:

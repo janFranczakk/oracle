@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException
 from oracle.datasets.api import PROJECT_ROOT, DatasetService
 from oracle.datasets.api import service as datasets
 from oracle.datasets.storage import read_json, read_manifest, write_json
+from oracle.paths import ARTIFACT_ROOT
 from oracle.research.families import FamilyStudies
 from oracle.research.registry import CheckpointRegistry
 from oracle.research.schema import BatchRequest, CheckpointNotes
@@ -217,9 +218,9 @@ class ResearchService:
 
 
 service = ResearchService(
-    PROJECT_ROOT / "experiments" / "research", PROJECT_ROOT / "checkpoints", datasets
+    ARTIFACT_ROOT / "experiments" / "research", ARTIFACT_ROOT / "checkpoints", datasets
 )
-family_studies = FamilyStudies(PROJECT_ROOT / "experiments" / "multiseed")
+family_studies = FamilyStudies(ARTIFACT_ROOT / "experiments" / "multiseed")
 
 
 @router.get("/families")
