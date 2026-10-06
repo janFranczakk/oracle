@@ -26,6 +26,12 @@ class PredictionService:
             args.extend(["--checkpoint", str(checkpoint)])
         return self._execute(context, args)
 
+    def run_planning(self, context: dict) -> dict:
+        args = ["-m", "oracle.planning.worker"]
+        if context["operation"] == "search":
+            args.extend(["--checkpoint", str(self.catalog.checkpoint(context["model"]["id"]))])
+        return self._execute(context, args)
+
     def _execute(self, context: dict, args: list[str]) -> dict:
         if not self.lock.acquire(blocking=False):
             raise RuntimeError("Another prediction is running. Try again when it finishes.")
