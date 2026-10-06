@@ -127,7 +127,7 @@ autoregressive learned future            isolated physical future
 
 `frontend/src/counterfactual/` keeps branch state separate from the live store, presents previews and a bounded tree, and renders exact returned poses in PixiJS overlay / split views. Shared drawing helpers preserve the existing Lab styling. A draft hides saved futures / measurements until committed or discarded. Browser plans persist locally; imported sources are replay-validated and imported metrics are ignored. [Counterfactual specification](COUNTERFACTUAL.md) defines conditioning, source identity, clocks, bounds and compatibility.
 
-## Stage 6 advanced models and Stage 7–8 extension points
+## Stage 6 advanced models and extension points
 
 `contracts.py` defines `DynamicsModel`, an object-centric frame-history input, typed interventions and a model-attributed `Prediction` result. Lab responses use `oracle-prediction-v1`; Counterfactual Lab uses portable plan / future / report v1 formats with separate sources. Stage 6 adds optional attention and MC dropout distribution fields without changing deterministic point forecasts. The direct adapter rejects opaque interventions; Counterfactual Lab derives its model window explicitly. Intervention-specific training, aleatoric estimation and uncertainty calibration remain future work. [Advanced model and measurement contract](ADVANCED_MODELS.md).
 
@@ -138,10 +138,18 @@ autoregressive learned future            isolated physical future
 | 4 — implemented | `prediction/` | Verified learned rollout, Lab ghost trajectories and per-object ground-truth error visualization |
 | 5 — implemented | `counterfactual/` | Immutable source observations, explicit derived conditioning, branch trees, separate prediction and reality execution |
 | 6 — implemented | `models/attention.py`, `models/sampling.py`, `training/uncertainty.py` | Masked object and temporal attention; seeded MC dropout paths; measured test/OOD marginal and joint coverage |
-| 7 | `experiments/`, `research/` | Matched-model evaluations, OOD suites, batch runs and honest reports |
+| 7 — implemented | `research/`, `oracle.research_batch` | Matched checkpoint targets/anchors, test/OOD batches, CPU timing and persistent reports |
 | 8 | `planning/` | Candidate actions ranked by learned rollouts and verified in reality |
 
 V2 visual encoders can map rendered observations into the same temporal input boundary. The renderer does not need to know whether a model uses a CNN, VAE, GRU or Transformer. 2.5D / 3D requires a versioned world schema and another physics / rendering adapter; Stage 1 does not claim a drop-in 3D engine.
+
+## Stage 7 research platform
+
+`research/schema.py` defines bounded batch requests and checkpoint annotations without loading PyTorch. `registry.py` extends the existing verified model catalog with separate labels/pins/archive files; weights, training metadata and laboratory availability stay intact. `api.py` supervises one file-locked research subprocess, persists status/report artifacts and enforces its owned worker deadline. `oracle.research_batch` and API jobs share `research/engine.py`.
+
+The engine validates completed training and fixed hashes, then requires exact dataset/normalizer/environment/clock identity. The maximum selected history becomes a common observation start passed to `training/evaluation.py`. Models keep their own trained history lengths, while targets, anchors, supported horizons and constant-velocity references are shared. Schedule hashes must agree before the complete report is atomically published. Real warmed CPU forward timing records its sample, threads and limited scope. [Research contract and API](RESEARCH.md).
+
+`ComparisonDashboard.tsx` owns selection, annotations, worker progress and the persistent batch log. `ComparisonResults.tsx` renders returned metrics, horizon points and provenance; `comparison.ts` validates inputs and creates CSV from measured values. It performs no simulation, inference or metric fabrication. Existing Research training/data views remain available.
 
 ## Design system
 

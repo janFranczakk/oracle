@@ -4,7 +4,7 @@ from pathlib import Path
 
 import torch
 from torch import Tensor
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 
 from oracle.datasets.schema import Normalization, Split, Suite
 from oracle.models.dynamics import ObjectDynamics
@@ -45,12 +45,22 @@ def advance_history(history: Tensor, prediction: Tensor, normalizer: Normalizati
 
 @torch.no_grad()
 def evaluate_group(
-    model: ObjectDynamics, data: SequenceDataset, horizons: list[int], device: str = "cpu"
+    model: ObjectDynamics,
+    data: SequenceDataset,
+    horizons: list[int],
+    device: str = "cpu",
+    anchor_history: int | None = None,
 ) -> dict:
     model.eval()
+    start = data.history if anchor_history is None else anchor_history
+    if start < data.history:
+        raise ValueError("Common evaluation history cannot be shorter than the model history")
+    indices = [i for i, (_, end) in enumerate(data.windows) if end >= start]
+    if not indices:
+        raise ValueError("No targets fit the common observation history")
     normalizer = data.normalizer
     learned_step, reference_step = Scores(), Scores()
-    for batch in DataLoader(data, batch_size=128, collate_fn=collate):
+    for batch in DataLoader(Subset(data, indices), batch_size=128, collate_fn=collate):
         batch = batch.to(device)
         output = model(batch.inputs, batch.mask, batch.dynamic)
         actual = raw_features(batch.targets, normalizer)
@@ -68,14 +78,14 @@ def evaluate_group(
             torch.full_like(batch.contacts, -100),
             batch.contacts,
         )
-    available = min(len(e.inputs) - data.history for e in data.episodes)
+    available = min(len(e.inputs) - start for e in data.episodes)
     supported = sorted(set(h for h in horizons if 1 <= h <= available))
     if not supported:
         raise ValueError("No evaluation horizon fits the recorded episodes")
     maximum = max(supported)
     anchors, samples, truths = [], [], []
     for episode in data.episodes:
-        first, last = data.history - 1, len(episode.inputs) - maximum - 1
+        first, last = start - 1, len(episode.inputs) - maximum - 1
         for anchor in sorted({first, (first + last) // 2, last}):
             anchors.append({"episode_id": episode.id, "seed": episode.seed, "sample": anchor})
             samples.append(
@@ -123,7 +133,7 @@ def evaluate_group(
         reference_history = advance_history(reference_history, reference, normalizer)
     return {
         "episodes": len(data.episodes),
-        "windows": len(data),
+        "windows": len(indices),
         "anchors": anchors,
         "sample_dt": data.dt,
         "omitted_horizons": sorted(set(horizons) - set(supported)),

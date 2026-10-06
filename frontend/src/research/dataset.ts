@@ -59,6 +59,7 @@ export type Manifest = {
   created_at: string;
   config: DatasetConfig;
   content_sha256: string;
+  normalization_sha256: string;
   runtime: Record<string, string>;
   episodes: EpisodeEntry[];
 };
