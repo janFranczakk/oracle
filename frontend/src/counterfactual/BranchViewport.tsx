@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Application, Container, Graphics } from 'pixi.js';
 import { Expand, Minus, Plus } from 'lucide-react';
-import type { Frame } from '../types';
+import type { Frame, Vec2 } from '../types';
 import { bodyGraphic, ghostGraphic } from '../rendering/graphics';
 import { hitTest, scaleFor, screenToWorld } from '../rendering/coordinates';
 import type { Camera } from '../rendering/coordinates';
@@ -20,6 +20,8 @@ type Props = {
   onSelect: (id: string) => void;
   camera: React.RefObject<Camera>;
   subtitle: string;
+  goal?: Vec2 & { tolerance_m: number };
+  alternatives?: Vec2[][];
 };
 
 export function BranchViewport(props: Props) {
@@ -90,6 +92,33 @@ export function BranchViewport(props: Props) {
     element.addEventListener('wheel', wheel, { passive: false });
     const draw = (state: Props) => {
       for (const child of drawing.removeChildren()) child.destroy({ children: true });
+      if (state.goal) {
+        const marker = new Graphics();
+        const { x, y, tolerance_m } = state.goal;
+        marker
+          .circle(x, y, tolerance_m)
+          .fill({ color: 0xdfb978, alpha: 0.08 })
+          .stroke({ color: 0xdfb978, width: 0.03, alpha: 0.8 });
+        marker
+          .moveTo(x - 0.2, y)
+          .lineTo(x + 0.2, y)
+          .moveTo(x, y - 0.2)
+          .lineTo(x, y + 0.2)
+          .stroke({ color: 0xdfb978, width: 0.04 });
+        drawing.addChild(marker);
+      }
+      if (state.alternatives) {
+        const paths = new Graphics();
+        for (const points of state.alternatives) {
+          if (!points.length) continue;
+          paths.moveTo(points[0].x, points[0].y);
+          for (const p of points.slice(1)) paths.lineTo(p.x, p.y);
+          paths.stroke({ color: 0xa79ad7, width: 0.018, alpha: 0.2 });
+          const end = points[points.length - 1];
+          paths.circle(end.x, end.y, 0.06).fill({ color: 0xa79ad7, alpha: 0.4 });
+        }
+        drawing.addChild(paths);
+      }
       const series = [
         { frame: state.frame, anchor: state.anchor, future: state.future, color: state.color },
         ...(state.other ? [state.other] : []),

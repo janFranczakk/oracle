@@ -17,6 +17,8 @@ from oracle.counterfactual.api import create_router as counterfactual_router
 from oracle.counterfactual.plans import PlanStore
 from oracle.datasets.api import PROJECT_ROOT
 from oracle.datasets.api import router as dataset_router
+from oracle.planning.api import create_router as planning_router
+from oracle.planning.store import PlanningStore
 from oracle.prediction.context import capture, matches
 from oracle.prediction.schema import PredictionRequest
 from oracle.prediction.service import PredictionService
@@ -31,6 +33,7 @@ clients: dict[str, set[WebSocket]] = {}
 last_revision: dict[str, int] = {}
 predictions = PredictionService(PROJECT_ROOT / "checkpoints")
 counterfactuals = PlanStore()
+planning = PlanningStore()
 
 
 async def broadcast(session_id: str, full: bool = True) -> None:
@@ -62,6 +65,7 @@ async def simulation_loop() -> None:
                     accumulators.pop(sid, None)
                     last_revision.pop(sid, None)
                     counterfactuals.discard_owner(sid)
+                    planning.discard_owner(sid)
                 continue
             if session.playing:
                 accumulator = accumulators.get(sid, 0) + elapsed * session.speed
@@ -84,7 +88,7 @@ async def lifespan(_app: FastAPI):
         await task
 
 
-app = FastAPI(title="ORACLE · Research API", version="0.7.0", lifespan=lifespan)
+app = FastAPI(title="ORACLE · Research API", version="0.8.0", lifespan=lifespan)
 app.include_router(dataset_router)
 app.include_router(training_router)
 app.include_router(research_router)
@@ -119,6 +123,7 @@ def get_session(sid: str) -> Session:
 
 
 app.include_router(counterfactual_router(get_session, counterfactuals, predictions))
+app.include_router(planning_router(get_session, planning, predictions))
 
 
 @app.get("/api/health")

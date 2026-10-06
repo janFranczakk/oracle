@@ -6,7 +6,7 @@
 
 ORACLE studies the gap between what a controlled physical world does and what a learned dynamics model predicts. The intended workflow is observation → intervention → model prediction → ground-truth execution → measured error.
 
-**Stages 1–7 are implemented:** a deterministic 2D laboratory, reproducible datasets, real object-centric PyTorch MLP / GRU / Transformer training, the Prediction Lab and immutable counterfactual branches. The Transformer adds masked object attention, temporal attention and seeded MC dropout position intervals. Research reports measured test/OOD coverage and interval width, and compares fixed checkpoints on identical held-out targets and rollout anchors. Batch reports include real CPU timing, provenance and JSON/CSV exports; checkpoint labels, pins and archival are reversible. Counterfactual Lab executes Pymunk reality on a separate explicit request. Both laboratories expose measured errors, attention weights and provenance-rich JSON exports.
+**Stages 1–8 are implemented:** a deterministic 2D laboratory, reproducible datasets, real object-centric PyTorch MLP / GRU / Transformer training, the Prediction Lab and immutable counterfactual branches. The Transformer adds masked object attention, temporal attention and seeded MC dropout position intervals. Research reports measured test/OOD coverage and interval width, and compares fixed checkpoints on identical held-out targets and rollout anchors. Batch reports include real CPU timing, provenance and JSON/CSV exports; checkpoint labels, pins and archival are reversible. Planning ranks nine velocity actions by learned endpoint distance to a goal, then separately verifies the fixed winner in Pymunk. Counterfactual and Planning workspaces expose separate predicted/actual measurements and portable JSON reports.
 
 ## Core idea
 
@@ -23,7 +23,8 @@ oracle/
 │   │   ├── prediction/# real-history capture, isolated inference, replay reference, metrics
 │   │   ├── counterfactual/ # immutable plans, interventions, conditioning, isolated execution
 │   │   ├── training/  # sequences, optimization, checkpointing, metrics, evaluation
-│   │   └── research/  # matched checkpoint batches, reports and reversible registry
+│   │   ├── research/  # matched checkpoint batches, reports and reversible registry
+│   │   └── planning/  # bounded learned action search and explicit winner verification
 │   ├── tests/         # deterministic replay and API tests
 │   ├── pyproject.toml
 │   ├── requirements.lock.txt
@@ -37,7 +38,8 @@ oracle/
 │   │   ├── counterfactual/ # branch tree, intervention preview, comparative futures
 │   │   ├── research/  # dataset explorer, training and comparison dashboards
 │   │   ├── state/     # typed observation store
-│   │   └── timeline/  # recorded state scrubbing and transport
+│   │   ├── timeline/  # recorded state scrubbing and transport
+│   │   └── planning/  # terminal goal, candidate ranking and separate measurements
 │   └── pnpm-lock.yaml
 ├── scripts/          # Windows launcher and benchmark
 ├── docs/             # requirements, architecture, visual verification
@@ -49,10 +51,11 @@ oracle/
 ├── STAGE_4_REPORT.md
 ├── STAGE_5_REPORT.md
 ├── STAGE_6_REPORT.md
-└── STAGE_7_REPORT.md
+├── STAGE_7_REPORT.md
+└── STAGE_8_REPORT.md
 ```
 
-[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Prediction Lab](docs/PREDICTION.md) · [Counterfactual Lab](docs/COUNTERFACTUAL.md) · [Advanced models](docs/ADVANCED_MODELS.md) · [Research comparisons](docs/RESEARCH.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3](STAGE_3_REPORT.md) · [Stage 4](STAGE_4_REPORT.md) · [Stage 5 report](STAGE_5_REPORT.md) · [Stage 6 report](STAGE_6_REPORT.md) · [Stage 7 report](STAGE_7_REPORT.md)
+[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Prediction Lab](docs/PREDICTION.md) · [Counterfactual Lab](docs/COUNTERFACTUAL.md) · [Advanced models](docs/ADVANCED_MODELS.md) · [Research comparisons](docs/RESEARCH.md) · [Learned planning](docs/PLANNING.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3](STAGE_3_REPORT.md) · [Stage 4](STAGE_4_REPORT.md) · [Stage 5 report](STAGE_5_REPORT.md) · [Stage 6 report](STAGE_6_REPORT.md) · [Stage 7 report](STAGE_7_REPORT.md) · [Stage 8 report](STAGE_8_REPORT.md)
 
 Contributor rules: [AGENTS.md](AGENTS.md) · [Git and review workflow](docs/REPOSITORY_WORKFLOW.md). Substantial changes use separate branches and Pull Requests into `main`. GitHub Actions checks the backend on Linux / Windows and the frontend tests, lint, formatting and production build.
 
@@ -104,6 +107,12 @@ In the Lab: paused real observation history → verified trained weights → aut
 
 [1440×900 comparison](docs/screenshots/stage7-comparison-1440.jpg) · [OOD horizon detail](docs/screenshots/stage7-ood-1440.jpg) · [Checkpoint management](docs/screenshots/stage7-checkpoints-1920.jpg)
 
+### Learned Planning
+
+![Stage 8 learned action ranking and explicit reality](docs/screenshots/stage8-planning-1920.jpg)
+
+[1440×900 measurements](docs/screenshots/stage8-planning-1440.jpg) · [Goal editing hides previous measurements](docs/screenshots/stage8-goal-1440.jpg)
+
 ### Predicted vs Actual
 
 ![Stage 4 learned ghosts and measured errors](docs/screenshots/stage4-prediction-1440.jpg)
@@ -135,6 +144,7 @@ In the Lab: paused real observation history → verified trained weights → aut
 15. Open **Counterfactual**, record any missing real history and **Capture source**. Choose a body, preview an intervention and **Save alternative**. Select a parent before creating a child; all changes use the original observed anchor.
 16. **Predict future** uses real model weights. **Run reality** separately executes the branch in Pymunk. Compare alternatives or predicted / actual using overlay / split and the shared cursor. Save plans locally or export the full JSON report. Imported plans are replay-validated and require fresh computed futures.
 17. Open **Research → Model comparison**, select 2–4 completed checkpoints from the same dataset and choose test/OOD groups and observed horizons. **Run matched batch** scores identical targets/anchors, records real CPU forward timing and preserves its report in the batch log. Switch groups/horizons and export JSON/CSV. Inspect a checkpoint to label, pin or reversibly archive it from comparison selection.
+18. Open **Planning**, pause the live world and record any missing real history. Choose a dynamic body, terminal position goal/tolerance, completed model, observed horizon and velocity grid step. **Search learned futures** ranks the unchanged baseline and eight offsets using learned rollouts only. **Run reality** separately measures the fixed winner; inspect both goal distances and target FDE, scrub the sampled future and export the report. Expanding **Goal & search settings** lets you change the goal; changed settings hide previous measurements until a matching search is available.
 
 ## Installation
 
@@ -258,11 +268,11 @@ The Lab displays observed physical state and **translational kinetic energy**, e
 | 5 | Interventions, branch trees and comparative futures | Implemented and verified |
 | 6 | Transformer, object attention and uncertainty | Implemented and verified |
 | 7 | Model comparison, OOD suites and batch reports | Implemented and verified |
-| 8 | Planning through learned model rollouts | Planned |
+| 8 | Planning through learned model rollouts | Implemented and verified |
 
 ## Limitations
 
-Local prototype: no accounts, remote hosting or persistent session database. Collection, training and inference use separate processes. Browser world snapshots are limited to eight; counterfactual plans to two locally / four per live session, with 16 branches and eight intervention levels. Export important experiments. Recordings stop at 120 simulated seconds, scenes support 64 objects and experiments 512 edits. Seeks replay from the start. Predictions require compatible real history after edits, support up to 120 observed future steps and time out after 45 seconds. Each request starts a fresh CPU worker; startup latency remains. The physical reference ignores edits recorded after its anchor. Use ordinary speeds and avoid heavy initial overlaps. Small learned baselines have substantial OOD / long-horizon drift; Lab scenes are not certified in-distribution. Added-body history in counterfactual model inputs is explicitly synthetic. CUDA training is guarded but unverified. Research compares 2–4 checkpoints, with one worker per output root and a 15-minute API deadline; its warmed CPU timing excludes loading and transport. Checkpoints/reports remain local. Multi-seed significance, calibration, intervention-specific training, UI training cancellation / resume, planning and 3D are future work. Stage reports record actual verification coverage.
+Local prototype: no accounts, remote hosting or persistent session database. Collection, training and inference use separate processes. Browser world snapshots are limited to eight; counterfactual plans to two locally / four per live session, with 16 branches and eight intervention levels. Export important experiments. Recordings stop at 120 simulated seconds, scenes support 64 objects and experiments 512 edits. Seeks replay from the start. Predictions require compatible real history after edits, support up to 120 observed future steps and time out after 45 seconds. Each request starts a fresh CPU worker; startup latency remains. The physical reference ignores edits recorded after its anchor. Use ordinary speeds and avoid heavy initial overlaps. Small learned baselines have substantial OOD / long-horizon drift; Lab scenes are not certified in-distribution. Added-body history in counterfactual model inputs is explicitly synthetic. CUDA training is guarded but unverified. Research compares 2–4 checkpoints, with one worker per output root and a 15-minute API deadline; its warmed CPU timing excludes loading and transport. Planning supports one velocity intervention in a nine-action grid, ≤32 objects and ≤32768 candidate object-steps. It has no global optimality, intervention-specific training or calibrated confidence. Planning reports are session-scoped and require export for durable CLI reproduction. [Protocol and limits](docs/PLANNING.md). Checkpoints/reports remain local. Multi-seed significance, calibration, intervention-specific training, UI training cancellation / resume, sequential planning and 3D are future work. Stage reports record actual verification coverage.
 
 ## Research questions
 

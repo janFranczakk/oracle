@@ -139,7 +139,7 @@ autoregressive learned future            isolated physical future
 | 5 — implemented | `counterfactual/` | Immutable source observations, explicit derived conditioning, branch trees, separate prediction and reality execution |
 | 6 — implemented | `models/attention.py`, `models/sampling.py`, `training/uncertainty.py` | Masked object and temporal attention; seeded MC dropout paths; measured test/OOD marginal and joint coverage |
 | 7 — implemented | `research/`, `oracle.research_batch` | Matched checkpoint targets/anchors, test/OOD batches, CPU timing and persistent reports |
-| 8 | `planning/` | Candidate actions ranked by learned rollouts and verified in reality |
+| 8 — implemented | `planning/`, `oracle.plan` | Nine velocity actions ranked by learned endpoint distance; fixed winner separately verified in reality |
 
 V2 visual encoders can map rendered observations into the same temporal input boundary. The renderer does not need to know whether a model uses a CNN, VAE, GRU or Transformer. 2.5D / 3D requires a versioned world schema and another physics / rendering adapter; Stage 1 does not claim a drop-in 3D engine.
 
@@ -150,6 +150,14 @@ V2 visual encoders can map rendered observations into the same temporal input bo
 The engine validates completed training and fixed hashes, then requires exact dataset/normalizer/environment/clock identity. The maximum selected history becomes a common observation start passed to `training/evaluation.py`. Models keep their own trained history lengths, while targets, anchors, supported horizons and constant-velocity references are shared. Schedule hashes must agree before the complete report is atomically published. Real warmed CPU forward timing records its sample, threads and limited scope. [Research contract and API](RESEARCH.md).
 
 `ComparisonDashboard.tsx` owns selection, annotations, worker progress and the persistent batch log. `ComparisonResults.tsx` renders returned metrics, horizon points and provenance; `comparison.ts` validates inputs and creates CSV from measured values. It performs no simulation, inference or metric fabrication. Existing Research training/data views remain available.
+
+## Stage 8 learned rollout planning
+
+`planning/schema.py` and `search.py` validate the paused source identity, dynamic target, terminal position goal and bounded action grid. They materialize the unchanged baseline plus eight velocity offsets at the same captured anchor. `worker.py` replays known past once to obtain real history, loads one verified checkpoint with dropout disabled and rolls out each action through the learned adapter. It never integrates a physical future during search. Ranking is endpoint Euclidean distance, velocity-change magnitude and original input order. The selected full-world future and all nine target trajectories are returned.
+
+The report binds a normalized source plan, request and model description with SHA-256, including exact weights/data/normalizer/clock provenance. Normalization before hashing survives the browser's conversion of integral floats to JSON integers. Predictions reuse the existing counterfactual future and terminal-state conditioning contract, including `intervention_trained: false`. `store.py` keeps bounded owner-scoped reports; separate explicit reality requests execute the cached fixed winner through the Counterfactual worker, measure actual goal distance and forecast error, and leave the learned ranking intact.
+
+Prediction, Counterfactual and Planning share one inference supervisor slot and its 45-second deadline. API startup and reality-only workers do not import Torch. `frontend/src/planning/` owns goal controls, returned ranking, sampled cursor, separate measurements and JSON export. `BranchViewport` adds optional goal/alternative trajectory layers using returned positions. Existing callers retain their rendering behavior. The UI never performs physics, inference or objective scoring. [Planning protocol, API, reproduction and limits](PLANNING.md).
 
 ## Design system
 
