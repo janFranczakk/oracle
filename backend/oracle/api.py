@@ -20,6 +20,7 @@ from oracle.datasets.api import router as dataset_router
 from oracle.prediction.context import capture, matches
 from oracle.prediction.schema import PredictionRequest
 from oracle.prediction.service import PredictionService
+from oracle.research.api import router as research_router
 from oracle.scenes import scene
 from oracle.session import Session
 from oracle.training.api import router as training_router
@@ -83,9 +84,10 @@ async def lifespan(_app: FastAPI):
         await task
 
 
-app = FastAPI(title="ORACLE · Research API", version="0.6.0", lifespan=lifespan)
+app = FastAPI(title="ORACLE · Research API", version="0.7.0", lifespan=lifespan)
 app.include_router(dataset_router)
 app.include_router(training_router)
+app.include_router(research_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5181", "http://127.0.0.1:5181"],
