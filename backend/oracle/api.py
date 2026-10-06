@@ -83,7 +83,7 @@ async def lifespan(_app: FastAPI):
         await task
 
 
-app = FastAPI(title="ORACLE · Research API", version="0.5.0", lifespan=lifespan)
+app = FastAPI(title="ORACLE · Research API", version="0.6.0", lifespan=lifespan)
 app.include_router(dataset_router)
 app.include_router(training_router)
 app.add_middleware(

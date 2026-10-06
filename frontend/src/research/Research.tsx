@@ -62,7 +62,8 @@ export function Research() {
             </h1>
             <p>
               A controlled environment for testing learned dynamics. Physics and dataset foundations
-              are ready; MLP and GRU training now measure learned dynamics on held-out episodes.
+              are ready; MLP, GRU and Transformer training measure learned dynamics on held-out
+              episodes.
             </p>
             <div className="research-integrity">
               <span className="live-dot" />
@@ -71,7 +72,7 @@ export function Research() {
           </div>
           <div className="roadmap-grid">
             {stages.map(([number, title, desc, Icon], i) => (
-              <div className={`roadmap-card ${i < 3 ? 'ready' : ''}`} key={number}>
+              <div className={`roadmap-card ${i < 6 ? 'ready' : ''}`} key={number}>
                 <div>
                   <Icon size={20} />
                   <span>{number}</span>
@@ -79,12 +80,12 @@ export function Research() {
                 <h3>{title}</h3>
                 <p>{desc}</p>
                 <span className="roadmap-status">
-                  {i < 3 ? (
+                  {i < 6 ? (
                     <>
                       <Check size={12} />
                       IMPLEMENTED
                     </>
-                  ) : i === 3 ? (
+                  ) : i === 6 ? (
                     'NEXT STAGE'
                   ) : (
                     'PLANNED'

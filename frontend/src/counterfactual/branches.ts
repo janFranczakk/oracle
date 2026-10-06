@@ -16,8 +16,14 @@ export const branchApi = {
     model_id: string,
     horizon: number,
     sample_stride: number,
+    sampling: { samples: number; sampling_seed: number } = { samples: 0, sampling_seed: 7 },
   ) =>
-    request<Future>(`${root(sid)}/${plan}/${branch}/predict`, { model_id, horizon, sample_stride }),
+    request<Future>(`${root(sid)}/${plan}/${branch}/predict`, {
+      model_id,
+      horizon,
+      sample_stride,
+      ...sampling,
+    }),
   reality: (sid: string, plan: string, branch: string, horizon: number, sample_stride: number) =>
     request<Future>(`${root(sid)}/${plan}/${branch}/reality`, { horizon, sample_stride }),
 };

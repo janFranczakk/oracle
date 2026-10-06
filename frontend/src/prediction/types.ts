@@ -1,8 +1,17 @@
-import type { Experiment, Frame, Vec2 } from '../types';
+import type { Experiment, Frame } from '../types';
+import type { Attention, Distribution } from './diagnostics';
 
 export type ModelDescription = {
   id: string;
-  architecture: { family: 'mlp' | 'gru'; history: number; embedding: number; hidden: number };
+  architecture: {
+    family: 'mlp' | 'gru' | 'transformer';
+    history: number;
+    embedding: number;
+    hidden: number;
+    heads?: number;
+    layers?: number;
+    dropout?: number;
+  };
   epoch: number;
   sha256: string;
   dataset_id: string;
@@ -65,7 +74,8 @@ export type Prediction = {
       contact_counts: { tp: number; tn: number; fp: number; fn: number };
     };
   };
-  uncertainty: null | { method: string; positionStd: Vec2[][] };
+  uncertainty: Distribution | null;
+  attention?: Attention | null;
   elapsed_seconds: number;
   experiment: Experiment;
   observations: Frame[];

@@ -307,6 +307,10 @@
   border-radius: 7px;
   overflow: hidden;
 }
+.training-family button:last-child {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--line);
+}
 .training-family button {
   display: block;
   font: 12px var(--mono);

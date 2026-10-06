@@ -3,6 +3,17 @@ import { groupName, measured, rolloutChart, trainingConfig } from './training';
 import type { Group } from './training';
 
 describe('training experiment configuration', () => {
+  it('trains attention dropout rather than adding inference-only random noise', () => {
+    expect(trainingConfig('transformer', '35', '7', '4').model).toEqual({
+      family: 'transformer',
+      history: 4,
+      embedding: 64,
+      hidden: 64,
+      heads: 4,
+      layers: 2,
+      dropout: 0.1,
+    });
+  });
   it('uses a real CPU recipe with interchangeable temporal architecture', () => {
     const config = trainingConfig('gru', '35', '7', '4');
     expect(config.model.family).toBe('gru');

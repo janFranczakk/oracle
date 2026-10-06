@@ -1,5 +1,6 @@
 import type { Body, Experiment, Frame } from '../types';
 import type { ModelDescription, Prediction } from '../prediction/types';
+import type { Attention, Distribution, IntervalScore } from '../prediction/diagnostics';
 
 export type Patch = Partial<Omit<Body, 'id' | 'label' | 'shape' | 'static'>>;
 export type Change =
@@ -27,6 +28,7 @@ export type Comparison = {
   model_sha256: string;
   branch_sha256: string;
   metrics: Prediction['metrics'];
+  uncertainty_measurement?: IntervalScore | null;
 };
 export type Future = {
   format: 'oracle-counterfactual-future-v1';
@@ -40,7 +42,8 @@ export type Future = {
   sample_stride: number;
   sample_dt: number;
   frames: Frame[];
-  uncertainty: null;
+  uncertainty: Distribution | null;
+  attention?: Attention | null;
   elapsed_seconds: number;
   model?: ModelDescription;
   model_version?: string;

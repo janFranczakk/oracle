@@ -437,6 +437,9 @@
   padding: var(--s-4);
   border-bottom: 1px solid var(--line-soft);
 }
+.branch-inspector > .model-diagnostics {
+  margin: 16px;
+}
 .branch-execution label,
 .branch-object-select,
 .branch-commit label {

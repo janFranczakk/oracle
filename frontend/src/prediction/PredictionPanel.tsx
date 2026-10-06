@@ -5,6 +5,8 @@ import { useLab } from '../state/lab';
 import type { Command } from '../types';
 import { compatibleEnvironment, requiredTicks } from './forecast';
 import type { ModelCatalog, Prediction } from './types';
+import { ModelDiagnostics, SamplingControls } from './ModelDiagnostics';
+import { samplingOptions } from './diagnostics';
 import './prediction.css';
 
 const PredictionChart = lazy(() => import('./PredictionChart'));
@@ -21,6 +23,7 @@ export function PredictionPanel({ command }: { command: (cmd: Command) => Promis
   const modelId = useLab((s) => s.predictionModelId),
     horizon = useLab((s) => s.predictionHorizon);
   const [catalog, setCatalog] = useState<ModelCatalog | null>(null);
+  const [sampling, setSampling] = useState({ samples: 16, seed: '7' });
   const [loading, setLoading] = useState(true),
     [error, setError] = useState<string | null>(null);
   const mounted = useRef(true),
@@ -86,6 +89,10 @@ export function PredictionPanel({ command }: { command: (cmd: Command) => Promis
         anchor_tick: world.tick,
         revision: world.revision,
         horizon,
+        ...samplingOptions(
+          model.architecture.family === 'transformer' && (model.architecture.dropout ?? 0) > 0,
+          sampling,
+        ),
       });
       if (!useLab.getState().acceptPrediction(result) && mounted.current)
         setError('The world changed. Pause and predict again.');
@@ -204,11 +211,24 @@ export function PredictionPanel({ command }: { command: (cmd: Command) => Promis
               Install the ML dependencies described in README to run predictions.
             </p>
           )}
+          {model && (
+            <SamplingControls
+              enabled={
+                model.architecture.family === 'transformer' && (model.architecture.dropout ?? 0) > 0
+              }
+              settings={sampling}
+              disabled={!!busy}
+              onChange={(value) => {
+                setSampling(value);
+                useLab.getState().set({ prediction: null });
+              }}
+            />
+          )}
           {!loading && !model && (
             <div className="forecast-empty">
               <span>◈</span>
               <strong>Train your first world model.</strong>
-              <p>Completed MLP and GRU checkpoints become available here.</p>
+              <p>Completed MLP, GRU and Transformer checkpoints become available here.</p>
               <button onClick={() => useLab.getState().set({ page: 'research' })}>
                 Open Research <ArrowRight size={12} />
               </button>
@@ -380,6 +400,12 @@ export function PredictionPanel({ command }: { command: (cmd: Command) => Promis
               <dd>{Object.values(summary.contact_counts).join(' / ')}</dd>
             </dl>
           </details>
+          <ModelDiagnostics
+            uncertainty={prediction.uncertainty}
+            attention={prediction.attention}
+            step={step}
+            selected={selectedId}
+          />
           <button className="forecast-export" onClick={download}>
             <Download size={13} />
             Export forecast & comparison
@@ -399,7 +425,8 @@ export function PredictionPanel({ command }: { command: (cmd: Command) => Promis
       )}
       <div className="forecast-footnote">
         <span>
-          CONFIDENCE <strong>Not estimated</strong>
+          UNCERTAINTY{' '}
+          <strong>{prediction?.uncertainty ? 'MC dropout · uncalibrated' : 'Not estimated'}</strong>
         </span>
         <p>
           The Lab is an exploratory scene. Training-distribution membership is not certified. Long
