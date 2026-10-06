@@ -373,7 +373,7 @@ export function App() {
           <img src="/oracle.svg" alt="" />
           <div>
             <strong>
-              ORACLE<span className="brand-version"> / 05</span>
+              ORACLE<span className="brand-version"> / 06</span>
             </strong>
             <span>COUNTERFACTUAL PHYSICS LAB</span>
           </div>
@@ -410,7 +410,7 @@ export function App() {
                 ? 'CONNECTING'
                 : 'ENGINE OFFLINE'}
           </span>
-          <span className="version-pill">v0.5.0</span>
+          <span className="version-pill">v0.6.0</span>
         </div>
       </header>
       <div className="app-body">

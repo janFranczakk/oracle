@@ -6,7 +6,7 @@
 
 ORACLE studies the gap between what a controlled physical world does and what a learned dynamics model predicts. The intended workflow is observation → intervention → model prediction → ground-truth execution → measured error.
 
-**Stages 1–5 are implemented:** a deterministic 2D laboratory, reproducible datasets, real object-centric PyTorch MLP / GRU training, the Prediction Lab and immutable counterfactual branches. Research shows measured losses and held-out evaluation. Counterfactual Lab freezes an observed source, previews interventions, compares learned alternatives and executes Pymunk reality on a separate explicit request. Both workspaces expose measured errors and provenance-rich JSON exports.
+**Stages 1–6 are implemented:** a deterministic 2D laboratory, reproducible datasets, real object-centric PyTorch MLP / GRU / Transformer training, the Prediction Lab and immutable counterfactual branches. The Transformer adds masked object attention, temporal attention and seeded MC dropout position intervals. Research reports measured test/OOD coverage and interval width. Counterfactual Lab executes Pymunk reality on a separate explicit request. Both workspaces expose measured errors, attention weights and provenance-rich JSON exports.
 
 ## Core idea
 
@@ -19,7 +19,7 @@ oracle/
 ├── backend/
 │   ├── oracle/        # physics, sessions, API, model contracts, dataset CLI
 │   │   ├── datasets/  # sampling, storage, train normalization, workers
-│   │   ├── models/    # shared object encoder, MLP / GRU, checkpoint-backed prediction
+│   │   ├── models/    # object encoder, MLP / GRU / Transformer, dropout sampling
 │   │   ├── prediction/# real-history capture, isolated inference, replay reference, metrics
 │   │   ├── counterfactual/ # immutable plans, interventions, conditioning, isolated execution
 │   │   └── training/  # sequences, optimization, checkpointing, metrics, evaluation
@@ -46,10 +46,11 @@ oracle/
 ├── STAGE_2_REPORT.md
 ├── STAGE_3_REPORT.md
 ├── STAGE_4_REPORT.md
-└── STAGE_5_REPORT.md
+├── STAGE_5_REPORT.md
+└── STAGE_6_REPORT.md
 ```
 
-[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Prediction Lab](docs/PREDICTION.md) · [Counterfactual Lab](docs/COUNTERFACTUAL.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3](STAGE_3_REPORT.md) · [Stage 4](STAGE_4_REPORT.md) · [Stage 5 report](STAGE_5_REPORT.md)
+[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Prediction Lab](docs/PREDICTION.md) · [Counterfactual Lab](docs/COUNTERFACTUAL.md) · [Advanced models](docs/ADVANCED_MODELS.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3](STAGE_3_REPORT.md) · [Stage 4](STAGE_4_REPORT.md) · [Stage 5 report](STAGE_5_REPORT.md) · [Stage 6 report](STAGE_6_REPORT.md)
 
 Contributor rules: [AGENTS.md](AGENTS.md) · [Git and review workflow](docs/REPOSITORY_WORKFLOW.md). Substantial changes use separate branches and Pull Requests into `main`. GitHub Actions checks the backend on Linux / Windows and the frontend tests, lint, formatting and production build.
 
@@ -63,17 +64,17 @@ PixiJS provides GPU rendering, anti-aliased geometry, cached shapes and smooth c
 
 ## World model
 
-Stage 3 implements object encoder → pooled scene context → shared temporal MLP / GRU → learned motion residuals and contact logits. Verified checkpoints implement the `DynamicsModel` protocol and support autoregressive rollouts. Static geometry is context, not a target. Attention and Transformer models follow later; V2 can introduce visual encoders.
+MLP / GRU retain the Stage 3 shared encoder and pooled context. Stage 6 adds masked object attention → per-object temporal Transformer → learned motion residuals and contact logits. Verified checkpoints implement the `DynamicsModel` protocol and support autoregressive rollouts. Static geometry is context, not a target. Visual encoders remain a future extension.
 
 ## Counterfactual reasoning
 
 Counterfactual Lab captures a paused observation and its source journal. Preview mass, velocity, direction, material or geometry changes; insert, duplicate or remove bodies; save alternatives in an immutable tree. Children inherit interventions at the same observed source tick. Predict each alternative with verified weights, then separately **Run reality** to measure the error. Overlay / split views share a sampled cursor and camera. Neither operation changes the live world. Neutral replay trails are **recorded observations**; violet ghosts are learned outputs; cyan future traces are separately executed Pymunk reality.
 
-Stage 5 uses explicit derived-history conditioning of the existing MLP / GRU: preserve original observations, override the terminal state, project removed identities out, and label repeated anchor placeholders for added bodies as synthetic inputs. These models were not trained on interventions; results are exploratory and uncertainty is unestimated. [Conditioning and branch contract](docs/COUNTERFACTUAL.md).
+Counterfactual conditioning preserves original observations, overrides the terminal state, projects removed identities out, and labels repeated anchor placeholders for added bodies as synthetic inputs. All three model families were trained on ordinary episodes; intervention results remain exploratory. Transformer dropout intervals are optional and uncalibrated. [Conditioning and branch contract](docs/COUNTERFACTUAL.md).
 
 ## Prediction pipeline
 
-In the Lab: paused real observation history → verified trained weights → autoregressive rollout → violet ghosts / separate forecast cursor → measured errors against an independently replayed Pymunk reference. Both futures hold the anchor's conditions and leave live physics untouched. Inference runs in a bounded CPU subprocess; stale live anchors are rejected. Counterfactual Lab retains immutable source anchors even after live edits. Research / CLI retain separate held-out evaluation. Uncertainty remains unestimated. [Prediction measurement contract](docs/PREDICTION.md).
+In the Lab: paused real observation history → verified trained weights → autoregressive rollout → violet ghosts / separate forecast cursor → measured errors against an independently replayed Pymunk reference. Both futures hold the anchor's conditions and leave live physics untouched. Inference runs in a bounded CPU subprocess; stale live anchors are rejected. Counterfactual Lab retains immutable source anchors even after live edits. Research / CLI retain separate held-out evaluation. MC dropout reports empirical 5–95% marginal position intervals and their observed coverage; it does not certify confidence. [Prediction measurement contract](docs/PREDICTION.md).
 
 ## Screenshots
 

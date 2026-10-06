@@ -1,10 +1,19 @@
 import { request } from '../api/client';
 import { suiteNames } from './dataset';
 import type { Suite } from './dataset';
+import type { IntervalScore } from '../prediction/diagnostics';
 
-export type Family = 'mlp' | 'gru';
+export type Family = 'mlp' | 'gru' | 'transformer';
 export type TrainConfig = {
-  model: { family: Family; history: number; embedding: number; hidden: number };
+  model: {
+    family: Family;
+    history: number;
+    embedding: number;
+    hidden: number;
+    heads?: number;
+    layers?: number;
+    dropout?: number;
+  };
   epochs: number;
   seed: number;
   batch_size: number;
@@ -87,6 +96,18 @@ export type RunDetail = {
     runtime: { torch: string; python: string; platform: string; device: string };
     dataset: Identity;
   } | null;
+  uncertainty?: {
+    samples: number;
+    seed: number;
+    calibrated: false;
+    groups: Record<
+      string,
+      {
+        anchors: Group['anchors'];
+        horizons: (IntervalScore & { horizon: number; seconds: number })[];
+      }
+    >;
+  } | null;
 };
 export const trainingApi = {
   catalog: () => request<{ runs: Run[]; torch_available: boolean }>('/training/runs'),
@@ -107,7 +128,13 @@ export function trainingConfig(
     throw new Error('Choose an integer seed from 0 to 4294967295.');
   if (!integer(history, 8, 1)) throw new Error('Choose 1–8 observed history frames.');
   return {
-    model: { family, history: Number(history), embedding: 64, hidden: 64 },
+    model: {
+      family,
+      history: Number(history),
+      embedding: 64,
+      hidden: 64,
+      ...(family === 'transformer' ? { heads: 4, layers: 2, dropout: 0.1 } : {}),
+    },
     epochs: Number(epochs),
     seed: Number(seed),
     batch_size: 64,

@@ -95,7 +95,11 @@ def execute(context: dict, checkpoint: Path | None = None) -> dict:
         predicted = model.predict(inputs, None, request.horizon)
         frames = [Frame.model_validate(f.model_dump()) for f in predicted.frames]
         model_data = description.model_dump(mode="json")
+        diagnostics = model.diagnostics(
+            inputs, request.horizon, request.samples, request.sampling_seed
+        )
         extra = {
+            **diagnostics,
             "model": model_data,
             "model_version": model.version,
             "conditioning": conditioning,

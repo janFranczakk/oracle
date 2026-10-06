@@ -7,6 +7,7 @@ import { hitTest, scaleFor, screenToWorld } from '../rendering/coordinates';
 import type { Camera } from '../rendering/coordinates';
 import type { Future } from './types';
 import { ghostAlpha, ghostSteps } from '../prediction/forecast';
+import { intervalGraphic } from '../rendering/uncertainty';
 
 type Props = {
   title: string;
@@ -95,6 +96,8 @@ export function BranchViewport(props: Props) {
       ];
       for (const set of series) {
         if (!set.future) continue;
+        if (set.future.uncertainty)
+          drawing.addChild(intervalGraphic(set.future.uncertainty, set.frame.tick, state.selected));
         const paths = new Graphics();
         for (const body of set.anchor.objects.filter((b) => !b.static)) {
           paths.moveTo(body.position.x, body.position.y);

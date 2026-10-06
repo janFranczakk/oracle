@@ -28,7 +28,7 @@ Python owns positions, velocities, contacts and angular motion. Browser interpol
 
 The solver retains internal contact caches. Copying only transforms would not recreate that state. JSON therefore records the original scene and ordered, tick-indexed `upsert` / `remove` events. Seeking rebuilds the original solver and replays it to the playhead. Events at a tick are applied after reaching that tick, before its next integration step. Multiple edits at the same tick retain their order.
 
-Editing a historical state discards the later recording and its later events. Existing edits at the selected tick remain and the new edit is appended. This is a ground-truth recording fork; Stage 5 will add explicit counterfactual branch ownership and comparisons.
+Editing a historical state discards the later recording and its later events. Existing edits at the selected tick remain and the new edit is appended. This is a ground-truth recording fork; Counterfactual Lab separately owns immutable alternative branches and their comparisons.
 
 Import validates format, engine version, bounds, chronology, identifiers and object counts, then replays into a separate Session. Failed imports preserve the active world. Snapshots contain plain JSON and never executable pickle data. Restored worlds are paused.
 
@@ -127,9 +127,9 @@ autoregressive learned future            isolated physical future
 
 `frontend/src/counterfactual/` keeps branch state separate from the live store, presents previews and a bounded tree, and renders exact returned poses in PixiJS overlay / split views. Shared drawing helpers preserve the existing Lab styling. A draft hides saved futures / measurements until committed or discarded. Browser plans persist locally; imported sources are replay-validated and imported metrics are ignored. [Counterfactual specification](COUNTERFACTUAL.md) defines conditioning, source identity, clocks, bounds and compatibility.
 
-## Stage 6–8 extension points
+## Stage 6 advanced models and Stage 7–8 extension points
 
-`contracts.py` defines `DynamicsModel`, an object-centric frame-history input, typed interventions and a model-attributed `Prediction` result. Lab responses use `oracle-prediction-v1`; Counterfactual Lab uses portable plan / future / report v1 formats with separate sources. The direct learned adapter rejects opaque intervention arguments; Stage 5 explicitly derives its model window before calling the adapter. Intervention-specific training and uncertainty estimation remain future work.
+`contracts.py` defines `DynamicsModel`, an object-centric frame-history input, typed interventions and a model-attributed `Prediction` result. Lab responses use `oracle-prediction-v1`; Counterfactual Lab uses portable plan / future / report v1 formats with separate sources. Stage 6 adds optional attention and MC dropout distribution fields without changing deterministic point forecasts. The direct adapter rejects opaque interventions; Counterfactual Lab derives its model window explicitly. Intervention-specific training, aleatoric estimation and uncertainty calibration remain future work. [Advanced model and measurement contract](ADVANCED_MODELS.md).
 
 | Stage | Planned modules | Research boundary |
 | --- | --- | --- |
@@ -137,7 +137,7 @@ autoregressive learned future            isolated physical future
 | 3 — implemented | `models/`, `training/` | PyTorch encoder, MLP / GRU, checkpoints, one-step / autoregressive evaluation |
 | 4 — implemented | `prediction/` | Verified learned rollout, Lab ghost trajectories and per-object ground-truth error visualization |
 | 5 — implemented | `counterfactual/` | Immutable source observations, explicit derived conditioning, branch trees, separate prediction and reality execution |
-| 6 | `models/attention/`, `uncertainty/` | Temporal Transformer, ensemble / MC dropout outputs with named estimation methods |
+| 6 — implemented | `models/attention.py`, `models/sampling.py`, `training/uncertainty.py` | Masked object and temporal attention; seeded MC dropout paths; measured test/OOD marginal and joint coverage |
 | 7 | `experiments/`, `research/` | Matched-model evaluations, OOD suites, batch runs and honest reports |
 | 8 | `planning/` | Candidate actions ranked by learned rollouts and verified in reality |
 

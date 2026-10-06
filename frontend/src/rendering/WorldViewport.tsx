@@ -17,6 +17,7 @@ import { hitTest, scaleFor, screenToWorld, worldToScreen } from './coordinates';
 import type { Camera } from './coordinates';
 import { frameAt, ghostAlpha, ghostSteps, pairedBodies, trajectory } from '../prediction/forecast';
 import { bodyGraphic, ghostGraphic, CURVE_SCALE } from './graphics';
+import { intervalGraphic } from './uncertainty';
 
 type Props = { command: (value: Command) => Promise<void> };
 const HOME: Camera = { x: 12, y: 6.6, zoom: 1 };
@@ -202,6 +203,14 @@ export function WorldViewport({ command }: Props) {
             gaps.clear();
             for (const child of forecastBodies.removeChildren()) child.destroy();
             if (prediction) {
+              if (s.ghosts && prediction.uncertainty && s.forecastStep > 0)
+                forecastBodies.addChild(
+                  intervalGraphic(
+                    prediction.uncertainty,
+                    prediction.frames[s.forecastStep - 1].tick,
+                    s.selectedId,
+                  ),
+                );
               const dynamic = prediction.anchor_frame.objects.filter((body) => !body.static);
               for (const body of dynamic) {
                 const focus = !s.selectedId || body.id === s.selectedId;
@@ -471,6 +480,12 @@ export function WorldViewport({ command }: Props) {
             <span>
               <i />
               Learned future
+            </span>
+          )}
+          {ghosts && prediction.uncertainty && (
+            <span>
+              <i />
+              5–95% marginal intervals
             </span>
           )}
           {reference && (

@@ -10,6 +10,7 @@ from pathlib import Path
 from oracle.prediction.metrics import compare
 from oracle.prediction.reference import replay_reference
 from oracle.prediction.schema import ModelDescription, PredictionRequest
+from oracle.prediction.uncertainty import measure_intervals
 from oracle.world import Experiment, Frame
 
 
@@ -37,6 +38,13 @@ def forecast(checkpoint: Path, context: dict) -> dict:
     frames = [Frame.model_validate(f.model_dump()) for f in predicted.frames]
     actual = replay_reference(experiment, history[-1], description.sample_stride, request.horizon)
     metrics = compare(frames, actual, request.anchor_tick, experiment.origin.environment.dt)
+    diagnostics = model.diagnostics(
+        history, request.horizon, request.samples, request.sampling_seed
+    )
+    if diagnostics["uncertainty"]:
+        diagnostics["uncertainty"]["measurement"] = measure_intervals(
+            diagnostics["uncertainty"], actual
+        )
     return {
         "schema": "oracle-prediction-v1",
         "source": "learned_model",
@@ -57,7 +65,7 @@ def forecast(checkpoint: Path, context: dict) -> dict:
             "frames": [f.model_dump(mode="json") for f in actual],
         },
         "metrics": metrics,
-        "uncertainty": None,
+        **diagnostics,
         "elapsed_seconds": time.perf_counter() - started,
         "experiment": experiment.model_dump(mode="json"),
         "observations": [f.model_dump(mode="json") for f in history],

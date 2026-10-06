@@ -68,7 +68,7 @@ class TrainingService:
         if "config" not in configuration:
             configuration = {"config": configuration, "dataset": None}
         result = {"summary": self.status(identity), "config": configuration}
-        for name in ("metrics", "evaluation"):
+        for name in ("metrics", "evaluation", "uncertainty"):
             path = root / f"{name}.json"
             result[name] = read_json(path) if path.exists() else None
         path = root / "best.metadata.json"
@@ -76,6 +76,7 @@ class TrainingService:
         if result["summary"]["status"] != "complete":
             # Resume keeps old artifacts for recovery; never present them as current evaluation.
             result["evaluation"] = None
+            result["uncertainty"] = None
         return result
 
     def start(self, request: TrainRequest) -> dict:

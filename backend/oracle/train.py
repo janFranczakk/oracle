@@ -15,7 +15,7 @@ def main() -> None:
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--config", type=Path)
-    parser.add_argument("--model", choices=["mlp", "gru"], default="mlp")
+    parser.add_argument("--model", choices=["mlp", "gru", "transformer"], default="mlp")
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--history", type=int, default=4)
     parser.add_argument("--hidden", type=int, default=64)

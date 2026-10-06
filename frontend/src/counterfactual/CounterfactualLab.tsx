@@ -29,6 +29,8 @@ import { BranchViewport } from './BranchViewport';
 import { InterventionEditor } from './InterventionEditor';
 import type { Camera } from '../rendering/coordinates';
 import type { ModelCatalog } from '../prediction/types';
+import { ModelDiagnostics, SamplingControls } from '../prediction/ModelDiagnostics';
+import { samplingOptions } from '../prediction/diagnostics';
 import type { Plan } from './types';
 import './counterfactual.css';
 
@@ -67,6 +69,7 @@ export function CounterfactualLab() {
     horizon,
   } = state;
   const [catalog, setCatalog] = useState<ModelCatalog | null>(null);
+  const [sampling, setSampling] = useState({ samples: 16, seed: '7' });
   const [name, setName] = useState('Alternative A');
   const [saved, setSaved] = useState(library),
     [savedId, setSavedId] = useState('');
@@ -193,7 +196,19 @@ export function CounterfactualLab() {
         if (!sid || !plan) return;
         const value =
           operation === 'predict'
-            ? await branchApi.predict(sid, plan.id, selected, state.modelId, horizon, stride)
+            ? await branchApi.predict(
+                sid,
+                plan.id,
+                selected,
+                state.modelId,
+                horizon,
+                stride,
+                samplingOptions(
+                  model?.architecture.family === 'transformer' &&
+                    (model.architecture.dropout ?? 0) > 0,
+                  sampling,
+                ),
+              )
             : await branchApi.reality(sid, plan.id, selected, horizon, stride);
         if (!useBranches.getState().accept(value))
           throw new Error('This result belongs to another source. Select its saved plan.');
@@ -248,7 +263,13 @@ export function CounterfactualLab() {
           { ...result, metrics: measured(result) },
         ]),
       ),
-      uncertainty: null,
+      uncertainty: Object.values(results).some((result) => result.prediction?.uncertainty)
+        ? {
+            method: 'mc_dropout_autoregressive_v1',
+            calibrated: false,
+            location: 'results[branch].prediction.uncertainty',
+          }
+        : null,
     };
     const raw = JSON.stringify(report, null, 2);
     if (new Blob([raw]).size > 16 * 1024 * 1024) {
@@ -699,6 +720,15 @@ export function CounterfactualLab() {
                 onChange={(e) => state.set({ horizon: Number(e.target.value) })}
               />
             </label>
+            <SamplingControls
+              enabled={
+                model?.architecture.family === 'transformer' &&
+                (model.architecture.dropout ?? 0) > 0
+              }
+              settings={sampling}
+              disabled={disabled}
+              onChange={setSampling}
+            />
             <div className="branch-run-actions">
               <button
                 className="button branch-predict"
@@ -741,6 +771,15 @@ export function CounterfactualLab() {
                   : 'Two separate requests. Pymunk runs only when you choose Run reality.'}
             </p>
           </div>
+          {!draft.length && leftResult?.prediction && (
+            <ModelDiagnostics
+              uncertainty={leftResult.prediction.uncertainty}
+              attention={leftResult.prediction.attention}
+              step={cursor}
+              selected={selectedObject}
+              measurement={metrics ? leftResult.comparison?.uncertainty_measurement : null}
+            />
+          )}
           <div className="branch-metrics">
             <div>
               <span>PREDICTION ADE</span>
@@ -905,7 +944,7 @@ export function CounterfactualLab() {
           <div className="branch-integrity-note">
             <ShieldCheck size={14} />
             <p>
-              Exploratory intervention forecasts. MLP / GRU were trained on ordinary episodes;
+              Exploratory intervention forecasts. Models were trained on ordinary episodes;
               intervention accuracy is unverified. Confidence is not estimated.
             </p>
           </div>

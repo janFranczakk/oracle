@@ -26,6 +26,7 @@ import type { CatalogItem } from './dataset';
 import { groupName, measured, rolloutChart, trainingApi, trainingConfig } from './training';
 import type { Family, Run, RunDetail } from './training';
 import './training.css';
+import '../prediction/diagnostics.css';
 
 const errorMessage = (error: unknown) =>
   error instanceof Error
@@ -158,7 +159,16 @@ export function TrainingDashboard() {
   const exportEvaluation = () => {
     if (!current?.evaluation) return;
     const url = URL.createObjectURL(
-      new Blob([JSON.stringify(current.evaluation, null, 2)], { type: 'application/json' }),
+      new Blob(
+        [
+          JSON.stringify(
+            { ...current.evaluation, uncertainty: current.uncertainty ?? null },
+            null,
+            2,
+          ),
+        ],
+        { type: 'application/json' },
+      ),
     );
     const a = document.createElement('a');
     a.href = url;
@@ -243,7 +253,11 @@ export function TrainingDashboard() {
             <ArrowRight size={12} />
             <div>
               <span>03</span>
-              {run?.family === 'gru' ? 'Temporal GRU' : 'Temporal MLP'}
+              {run?.family === 'transformer'
+                ? 'Object / temporal Transformer'
+                : run?.family === 'gru'
+                  ? 'Temporal GRU'
+                  : 'Temporal MLP'}
               <small>Motion residual + contact</small>
             </div>
             <p>Weights learn the transition. Static geometry stays fixed.</p>
@@ -479,6 +493,48 @@ export function TrainingDashboard() {
                     </strong>
                   </span>
                 </div>
+                {current?.uncertainty?.groups[groupKey] && (
+                  <section
+                    className="uncertainty-evaluation"
+                    aria-label="Held-out interval quality"
+                  >
+                    <span className="eyebrow">MC DROPOUT / OBSERVED INTERVAL QUALITY</span>
+                    <p>
+                      {current.uncertainty.samples} paths per anchor · Seed{' '}
+                      {current.uncertainty.seed} · 5–95% marginal quantiles · No calibration fitted.
+                    </p>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>STEPS</th>
+                          <th>X / Y COVERAGE</th>
+                          <th>BOTH</th>
+                          <th>X / Y WIDTH · m</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {current.uncertainty.groups[groupKey].horizons.map((row) => (
+                          <tr key={row.horizon}>
+                            <td>+{row.horizon}</td>
+                            <td>
+                              {(row.coverage_x * 100).toFixed(1)} /{' '}
+                              {(row.coverage_y * 100).toFixed(1)}%
+                            </td>
+                            <td>{(row.coverage_xy * 100).toFixed(1)}%</td>
+                            <td>
+                              {row.width_x_m.toFixed(3)} / {row.width_y_m.toFixed(3)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p>
+                      Nominal 90% is per coordinate. Narrow intervals can miss the actual future.
+                      Joint coverage is measured separately. This is model spread, not a safety
+                      score.
+                    </p>
+                  </section>
+                )}
                 <p className="evaluation-footnote">
                   {group.episodes} episodes · {group.anchors.length} rollout anchors ·{' '}
                   {(1 / group.sample_dt).toFixed(0)} Hz observations. Contact is an onset within the
@@ -507,6 +563,12 @@ export function TrainingDashboard() {
             </button>
             <button className={family === 'gru' ? 'selected' : ''} onClick={() => setFamily('gru')}>
               GRU<small>Temporal memory</small>
+            </button>
+            <button
+              className={family === 'transformer' ? 'selected' : ''}
+              onClick={() => setFamily('transformer')}
+            >
+              Transformer<small>Object + time attention</small>
             </button>
           </div>
           <label className="training-field">
@@ -567,6 +629,16 @@ export function TrainingDashboard() {
             </select>
           </label>
           <div className="training-recipe">
+            {family === 'transformer' && (
+              <>
+                <span>
+                  ATTENTION<strong>4 heads · 2 layers</strong>
+                </span>
+                <span>
+                  DROPOUT<strong>0.10 · MC sampling</strong>
+                </span>
+              </>
+            )}
             <span>
               ADAMW<strong>lr 0.001</strong>
             </span>
