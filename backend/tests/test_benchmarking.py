@@ -147,6 +147,7 @@ def test_real_benchmark_repeats_metrics_and_never_steps_future_during_prediction
     with (tmp_path / "first/summary.csv").open(encoding="utf-8", newline="") as stream:
         rows = list(csv.DictReader(stream))
     item = first["aggregates"][0]
+    assert item["magnitude"]["mean"] == 0  # unchanged baseline, equal-scene aggregation
     assert float(rows[0]["mean"]) == item["metrics"][rows[0]["metric"]]["mean"]
     with pytest.raises(FileExistsError):
         run_benchmark([weights[2]], tmp_path / "first", config)

@@ -53,6 +53,18 @@ def test_real_multiseed_common_schedule_aggregation_validation_selection_and_cat
     studies = FamilyStudies(tmp_path / "studies")
     assert studies.detail("smoke") == report
     assert studies.catalog()[0]["seeds"] == [1, 2]
+    from unittest.mock import patch
+
+    from fastapi.testclient import TestClient
+
+    from oracle.api import app
+    from oracle.research import api as research_api
+
+    with patch.object(research_api, "family_studies", studies), TestClient(app) as client:
+        assert client.get("/api/research/families").json()["studies"][0]["id"] == "smoke"
+        assert client.get("/api/research/families/smoke").json() == report
+        assert client.get("/api/research/families/missing").status_code == 404
+        assert client.post("/api/research/families", json={}).status_code == 405
     with pytest.raises(FileExistsError):
         run_study(weights[1], tmp_path / "studies/smoke", config)
     with pytest.raises(ValueError):

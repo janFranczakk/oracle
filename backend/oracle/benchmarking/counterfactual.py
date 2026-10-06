@@ -96,6 +96,7 @@ def aggregate(rows: list[dict]) -> list[dict]:
                 "units": values[0]["units"],
                 "scenes": len(scored),
                 "unsupported": len(values) - len(scored),
+                "magnitude": summarize(r["magnitude"] for r in scored),
                 "metrics": {
                     metric: summarize(r["metrics"][metric] for r in scored) for metric in METRICS
                 },
@@ -309,6 +310,8 @@ def run_benchmark(
                     "horizon": a["horizon"],
                     "scenes": a["scenes"],
                     "unsupported": a["unsupported"],
+                    "magnitude_mean": a["magnitude"]["mean"],
+                    "magnitude_std": a["magnitude"]["std"],
                     "metric": metric,
                     **{k: v for k, v in stats.items() if k != "mean_ci95"},
                 }

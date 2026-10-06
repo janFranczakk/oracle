@@ -38,10 +38,15 @@ class FamilyStudies:
         if not self.root.exists():
             return []
         results = []
+        bytes_read = 0
         for directory in sorted(self.root.iterdir())[:100]:
             if not directory.is_dir():
                 continue
             try:
+                size = (directory / "report.json").stat().st_size
+                if bytes_read + size > 32 * 1024 * 1024:
+                    continue
+                bytes_read += size
                 report = self.detail(directory.name)
                 results.append(
                     {
