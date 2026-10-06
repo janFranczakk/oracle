@@ -13,6 +13,8 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import Field, ValidationError
 
+from oracle.counterfactual.api import create_router as counterfactual_router
+from oracle.counterfactual.plans import PlanStore
 from oracle.datasets.api import PROJECT_ROOT
 from oracle.datasets.api import router as dataset_router
 from oracle.prediction.context import capture, matches
@@ -27,6 +29,7 @@ sessions: dict[str, Session] = {}
 clients: dict[str, set[WebSocket]] = {}
 last_revision: dict[str, int] = {}
 predictions = PredictionService(PROJECT_ROOT / "checkpoints")
+counterfactuals = PlanStore()
 
 
 async def broadcast(session_id: str, full: bool = True) -> None:
@@ -57,6 +60,7 @@ async def simulation_loop() -> None:
                     clients.pop(sid, None)
                     accumulators.pop(sid, None)
                     last_revision.pop(sid, None)
+                    counterfactuals.discard_owner(sid)
                 continue
             if session.playing:
                 accumulator = accumulators.get(sid, 0) + elapsed * session.speed
@@ -79,7 +83,7 @@ async def lifespan(_app: FastAPI):
         await task
 
 
-app = FastAPI(title="ORACLE · Research API", version="0.4.0", lifespan=lifespan)
+app = FastAPI(title="ORACLE · Research API", version="0.5.0", lifespan=lifespan)
 app.include_router(dataset_router)
 app.include_router(training_router)
 app.add_middleware(
@@ -110,6 +114,9 @@ def get_session(sid: str) -> Session:
         raise HTTPException(404, "This session has expired. Reconnect to create a world.")
     sessions[sid].last_active = time.monotonic()
     return sessions[sid]
+
+
+app.include_router(counterfactual_router(get_session, counterfactuals, predictions))
 
 
 @app.get("/api/health")
