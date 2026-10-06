@@ -1,3 +1,7 @@
+import { BranchTree } from './BranchTree';
+import { ProvenancePanel } from './ProvenancePanel';
+import { useCounterfactualLibrary } from './useCounterfactualLibrary';
+import { useCounterfactualTask } from './useCounterfactualTask';
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
@@ -23,7 +27,6 @@ import {
   differences,
   measured,
   sampledFrame,
-  treeRows,
 } from './branches';
 import { BranchViewport } from './BranchViewport';
 import { InterventionEditor } from './InterventionEditor';
@@ -31,21 +34,8 @@ import type { Camera } from '../rendering/coordinates';
 import type { ModelCatalog } from '../prediction/types';
 import { ModelDiagnostics, SamplingControls } from '../prediction/ModelDiagnostics';
 import { samplingOptions } from '../prediction/diagnostics';
-import type { Plan } from './types';
 import './counterfactual.css';
 
-const LIBRARY_KEY = 'oracle.counterfactual-plans.v1';
-type Saved = { name: string; plan: Plan };
-function library(): Saved[] {
-  try {
-    const value: unknown = JSON.parse(localStorage.getItem(LIBRARY_KEY) || '[]');
-    return Array.isArray(value)
-      ? value.filter((v) => v?.plan?.format === 'oracle-counterfactual-plan-v1').slice(0, 2)
-      : [];
-  } catch {
-    return [];
-  }
-}
 const failure = (error: unknown) =>
   error instanceof Error ? error.message : 'Counterfactual operation failed. Try again.';
 const format = (number: number | null | undefined) => (number == null ? '—' : number.toFixed(3));
@@ -71,8 +61,6 @@ export function CounterfactualLab() {
   const [catalog, setCatalog] = useState<ModelCatalog | null>(null);
   const [sampling, setSampling] = useState({ samples: 16, seed: '7' });
   const [name, setName] = useState('Alternative A');
-  const [saved, setSaved] = useState(library),
-    [savedId, setSavedId] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [comparisonMode, setComparisonMode] = useState<'alternatives' | 'prediction-reality'>(
@@ -125,18 +113,15 @@ export function CounterfactualLab() {
   const currentBody = draftFrame?.objects.find((b) => b.id === selectedObject);
   const originalBody = anchor?.objects.find((b) => b.id === selectedObject);
 
-  const perform = async (label: string, action: () => Promise<void>) => {
-    if (useLab.getState().busy) return;
-    useLab.getState().set({ busy: label, error: null });
-    setPlaying(false);
-    try {
-      await action();
-    } catch (error) {
-      useLab.getState().set({ error: failure(error) });
-    } finally {
-      useLab.getState().set({ busy: null });
-    }
-  };
+  const perform = useCounterfactualTask(() => setPlaying(false));
+  const { saved, savedId, setSavedId, save, restore, download } = useCounterfactualLibrary({
+    plan,
+    results,
+    sid,
+    perform,
+    onRestored: () => Object.assign(camera.current, { x: 12, y: 6.6, zoom: 1 }),
+    notify: setNotice,
+  });
   const refresh = async () => {
     const value = await request<ModelCatalog>('/prediction/models');
     setCatalog(value);
@@ -219,72 +204,6 @@ export function CounterfactualLab() {
         }
       },
     );
-  const save = () => {
-    if (!plan) return;
-    try {
-      const next = [
-        {
-          name: `${plan.snapshot.experiment.origin.scene} · t${plan.snapshot.frame.tick} · ${plan.branches.length} branches`,
-          plan,
-        },
-        ...saved.filter((v) => v.plan.id !== plan.id),
-      ].slice(0, 2);
-      localStorage.setItem(LIBRARY_KEY, JSON.stringify(next));
-      setSaved(next);
-      setSavedId(plan.id);
-      setNotice(
-        'Plan saved locally. Model weights and computed futures remain separate; export results to keep them.',
-      );
-    } catch {
-      useLab
-        .getState()
-        .set({ error: 'Browser storage is full. Export this experiment to preserve it.' });
-    }
-  };
-  const restore = (value: unknown) =>
-    perform('Validating saved source replay', async () => {
-      if (!sid) return;
-      const data = await branchApi.restore(sid, value);
-      useBranches.getState().setDescription(data);
-      Object.assign(camera.current, { x: 12, y: 6.6, zoom: 1 });
-      setNotice(
-        'Source and branches restored after replay validation. Imported results are not trusted; run new futures.',
-      );
-    });
-  const download = () => {
-    if (!plan) return;
-    const report = {
-      format: 'oracle-counterfactual-report-v1',
-      created_at: new Date().toISOString(),
-      plan,
-      results: Object.fromEntries(
-        Object.entries(results).map(([id, result]) => [
-          id,
-          { ...result, metrics: measured(result) },
-        ]),
-      ),
-      uncertainty: Object.values(results).some((result) => result.prediction?.uncertainty)
-        ? {
-            method: 'mc_dropout_autoregressive_v1',
-            calibrated: false,
-            location: 'results[branch].prediction.uncertainty',
-          }
-        : null,
-    };
-    const raw = JSON.stringify(report, null, 2);
-    if (new Blob([raw]).size > 16 * 1024 * 1024) {
-      useLab.getState().set({
-        error: 'This report exceeds the 16 MiB export limit. Export a smaller experiment.',
-      });
-      return;
-    }
-    const url = URL.createObjectURL(new Blob([raw], { type: 'application/json' }));
-    const element = document.createElement('a');
-    element.href = url;
-    element.download = `oracle-counterfactual-t${plan.snapshot.frame.tick}.json`;
-    element.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
 
   return (
     <div className="counterfactual-lab">
@@ -359,41 +278,15 @@ export function CounterfactualLab() {
             <span className="eyebrow">FUTURE TREE</span>
             <GitBranch size={14} />
           </div>
-          <div className="branch-tree-list">
-            {plan ? (
-              treeRows(plan).map(({ branch: item, depth }) => (
-                <button
-                  key={item.id}
-                  aria-label={`Select branch ${item.name}`}
-                  aria-pressed={selected === item.id}
-                  className={`branch-node ${selected === item.id ? 'selected' : ''}`}
-                  onClick={() => {
-                    state.select(item.id);
-                    setPlaying(false);
-                  }}
-                  style={{ paddingLeft: 12 + Math.min(depth, 4) * 12 }}
-                >
-                  <span className="branch-node-line" />
-                  <span>
-                    <strong>{item.name}</strong>
-                    <small>
-                      {item.parent_id
-                        ? `${item.changes.length} intervention${item.changes.length > 1 ? 's' : ''}`
-                        : 'Observed anchor'}
-                    </small>
-                    <i>
-                      {results[item.id]?.prediction ? 'PREDICTED' : '—'}
-                      {results[item.id]?.reality ? ' / EXECUTED' : ''}
-                    </i>
-                  </span>
-                </button>
-              ))
-            ) : (
-              <p className="branch-help">
-                Capture a paused source to create immutable alternatives.
-              </p>
-            )}
-          </div>
+          <BranchTree
+            plan={plan}
+            selected={selected}
+            results={results}
+            onSelect={(id) => {
+              state.select(id);
+              setPlaying(false);
+            }}
+          />
           <div className="branch-library">
             <span className="eyebrow">SAVED PLANS</span>
             <select
@@ -919,28 +812,7 @@ export function CounterfactualLab() {
               </small>
             </div>
           ) : null}
-          {leftResult?.prediction && (
-            <details className="branch-provenance">
-              <summary>
-                <Fingerprint size={12} /> Verified checkpoint & conditioning
-              </summary>
-              <p>{leftResult.prediction.model_version}</p>
-              <code>{leftResult.prediction.model?.sha256}</code>
-              <span>Dataset {leftResult.prediction.model?.dataset_id}</span>
-              <code>{leftResult.prediction.model?.normalization_sha256}</code>
-              <p>
-                Terminal state override · original observations retained. Removed identities are
-                projected out of model inputs.
-              </p>
-              {!!leftResult.prediction.conditioning?.added_ids.length && (
-                <p className="amber">
-                  New bodies use synthetic repeated anchor placeholders in the model window:{' '}
-                  {leftResult.prediction.conditioning.added_ids.join(', ')}. These are conditioning
-                  inputs, not observations.
-                </p>
-              )}
-            </details>
-          )}
+          <ProvenancePanel prediction={leftResult?.prediction} />
           <div className="branch-integrity-note">
             <ShieldCheck size={14} />
             <p>
