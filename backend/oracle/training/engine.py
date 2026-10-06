@@ -137,7 +137,7 @@ def train(root: Path, output: Path, config: TrainConfig, resume: Path | None = N
             raise ValueError(
                 "Exact resume requires the original PyTorch, Python, platform and device"
             )
-        previous = value["config"].copy()
+        previous = TrainConfig.model_validate(value["config"]).model_dump(mode="json")
         current = config.model_dump(mode="json")
         previous.pop("epochs")
         current.pop("epochs")
@@ -232,6 +232,21 @@ def train(root: Path, output: Path, config: TrainConfig, resume: Path | None = N
         selected_epoch=checkpoint["epoch"],
     )
     write_json(output / "evaluation.json", evaluation)
+    if config.model.family == "transformer" and config.model.dropout > 0:
+        from oracle.training.uncertainty import evaluate_uncertainty
+
+        status.update(phase="measuring_uncertainty")
+        write_json(output / "status.json", status)
+        uncertainty = evaluate_uncertainty(
+            selected, root, config.horizons, config.seed, config.device
+        )
+        uncertainty.update(
+            dataset=identity,
+            model_version=f"{output.name}/epoch-{checkpoint['epoch']}",
+            selected_epoch=checkpoint["epoch"],
+            checkpoint_sha256=read_json(output / "best.metadata.json")["sha256"],
+        )
+        write_json(output / "uncertainty.json", uncertainty)
     status.update(
         status="complete",
         phase="ready",

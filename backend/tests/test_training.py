@@ -74,12 +74,12 @@ def test_windows_never_cross_episode_or_split(data):
         SequenceDataset(root, Split.TEST, 2).contact_positive_weight()
 
 
-@pytest.mark.parametrize("family", ["mlp", "gru"])
+@pytest.mark.parametrize("family", ["mlp", "gru", "transformer"])
 def test_object_permutation_padding_and_static_context(data, family):
     configure_runtime(configuration(family))
     dataset = SequenceDataset(data[0], Split.TRAIN, 2)
     batch = collate([dataset[0]])
-    model = ObjectDynamics(configuration(family).model)
+    model = ObjectDynamics(configuration(family).model).eval()
     expected = model(batch.inputs, batch.mask, batch.dynamic)
     permutation = torch.randperm(batch.mask.shape[1])
     reordered = model(
@@ -100,7 +100,7 @@ def test_object_permutation_padding_and_static_context(data, family):
     assert torch.equal(expected.features[..., 7:], batch.inputs[:, -1, :, 7:13])
 
 
-@pytest.mark.parametrize("family", ["mlp", "gru"])
+@pytest.mark.parametrize("family", ["mlp", "gru", "transformer"])
 def test_real_training_updates_weights_and_publishes_held_out_evaluation(data, tmp_path, family):
     config = configuration(family)
     configure_runtime(config)
@@ -118,14 +118,31 @@ def test_real_training_updates_weights_and_publishes_held_out_evaluation(data, t
     assert [r["horizon"] for r in group["rollout"]["learned"]] == [1, 3]
     assert group["one_step"]["learned"]["objects_scored"] > 0
     assert group["rollout"]["learned"][-1]["ade_m"] >= 0
+    if family == "transformer":
+        uncertainty = read_json(tmp_path / family / "uncertainty.json")
+        assert len(uncertainty["groups"]) == 7
+        assert uncertainty["calibrated"] is False
+        assert (
+            uncertainty["checkpoint_sha256"]
+            == read_json(tmp_path / family / "best.metadata.json")["sha256"]
+        )
+        assert uncertainty["groups"]["test"]["horizons"][-1]["objects_scored"] > 0
 
 
-def test_same_seed_and_exact_resume_match_uninterrupted_cpu_training(data, tmp_path):
+@pytest.mark.parametrize("family", ["mlp", "transformer"])
+def test_same_seed_and_exact_resume_match_uninterrupted_cpu_training(data, tmp_path, family):
     full, repeat, resumed = [tmp_path / name for name in ("full", "repeat", "resumed")]
-    train(data[0], full, configuration(epochs=3))
-    train(data[0], repeat, configuration(epochs=3))
-    train(data[0], resumed, configuration(epochs=1))
-    train(data[0], resumed, configuration(epochs=3), resumed / "last.pt")
+    train(data[0], full, configuration(family, epochs=3))
+    train(data[0], repeat, configuration(family, epochs=3))
+    train(data[0], resumed, configuration(family, epochs=1))
+    if family == "mlp":
+        # Simulate the exact pre-Stage-6 public architecture. Weights and optimizer are unchanged.
+        _, legacy = load_checkpoint(resumed / "last.pt")
+        for key in ("heads", "layers", "dropout"):
+            legacy["architecture"].pop(key)
+            legacy["config"]["model"].pop(key)
+        save_checkpoint(resumed / "last.pt", legacy)
+    train(data[0], resumed, configuration(family, epochs=3), resumed / "last.pt")
     _, reference = load_checkpoint(full / "last.pt")
     for directory in (repeat, resumed):
         _, candidate = load_checkpoint(directory / "last.pt")
