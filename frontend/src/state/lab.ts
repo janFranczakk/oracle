@@ -22,7 +22,7 @@ type LabStore = {
   connection: 'connecting' | 'online' | 'offline';
   busy: string | null;
   error: string | null;
-  page: 'lab' | 'research';
+  page: 'lab' | 'research' | 'counterfactual';
   grid: boolean;
   vectors: boolean;
   trails: boolean;

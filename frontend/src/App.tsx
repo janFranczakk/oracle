@@ -10,6 +10,7 @@ import {
   Download,
   FlaskConical,
   FolderOpen,
+  GitBranch,
   Info,
   Layers,
   Orbit,
@@ -32,6 +33,11 @@ import type { Body, Command, Experiment, Scene, Shape } from './types';
 type Snapshot = { id: string; name: string; data: Experiment };
 const Research = lazy(() =>
   import('./research/Research').then((module) => ({ default: module.Research })),
+);
+const CounterfactualLab = lazy(() =>
+  import('./counterfactual/CounterfactualLab').then((module) => ({
+    default: module.CounterfactualLab,
+  })),
 );
 const SNAPSHOTS_KEY = 'oracle.snapshots.v1';
 const sceneTitles: Record<Scene, string> = {
@@ -367,7 +373,7 @@ export function App() {
           <img src="/oracle.svg" alt="" />
           <div>
             <strong>
-              ORACLE<span className="brand-version"> / 04</span>
+              ORACLE<span className="brand-version"> / 05</span>
             </strong>
             <span>COUNTERFACTUAL PHYSICS LAB</span>
           </div>
@@ -379,6 +385,13 @@ export function App() {
           >
             <Orbit size={15} />
             Lab
+          </button>
+          <button
+            className={page === 'counterfactual' ? 'selected' : ''}
+            onClick={() => useLab.getState().set({ page: 'counterfactual' })}
+          >
+            <GitBranch size={15} />
+            Counterfactual
           </button>
           <button
             className={page === 'research' ? 'selected' : ''}
@@ -397,7 +410,7 @@ export function App() {
                 ? 'CONNECTING'
                 : 'ENGINE OFFLINE'}
           </span>
-          <span className="version-pill">v0.4.0</span>
+          <span className="version-pill">v0.5.0</span>
         </div>
       </header>
       <div className="app-body">
@@ -597,6 +610,16 @@ export function App() {
                 </div>
               </div>
             </>
+          ) : page === 'counterfactual' ? (
+            <Suspense
+              fallback={
+                <div className="research-page" role="status">
+                  Loading counterfactual workspace…
+                </div>
+              }
+            >
+              <CounterfactualLab />
+            </Suspense>
           ) : (
             <Suspense
               fallback={
