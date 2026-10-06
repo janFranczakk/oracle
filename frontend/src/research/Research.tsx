@@ -12,6 +12,7 @@ import {
 import { useState } from 'react';
 import { DatasetExplorer } from './DatasetExplorer';
 import { TrainingDashboard } from './TrainingDashboard';
+import { ComparisonDashboard } from './ComparisonDashboard';
 import './datasets.css';
 const stages = [
   ['01', 'Physics foundation', 'Deterministic simulation, state editing and replay.', Orbit],
@@ -42,6 +43,13 @@ export function Research() {
           <Boxes size={14} />
           Dataset engine<span className="tag">LIVE</span>
         </button>
+        <button
+          className={view === 'comparison' ? 'selected' : ''}
+          onClick={() => setView('comparison')}
+        >
+          <FlaskConical size={14} />
+          Model comparison<span className="tag">LIVE</span>
+        </button>
         <button className={view === 'roadmap' ? 'selected' : ''} onClick={() => setView('roadmap')}>
           <Waypoints size={14} />
           Research roadmap
@@ -51,6 +59,8 @@ export function Research() {
         <TrainingDashboard />
       ) : view === 'datasets' ? (
         <DatasetExplorer />
+      ) : view === 'comparison' ? (
+        <ComparisonDashboard />
       ) : (
         <>
           <div className="research-intro">
@@ -72,7 +82,7 @@ export function Research() {
           </div>
           <div className="roadmap-grid">
             {stages.map(([number, title, desc, Icon], i) => (
-              <div className={`roadmap-card ${i < 6 ? 'ready' : ''}`} key={number}>
+              <div className={`roadmap-card ${i < 7 ? 'ready' : ''}`} key={number}>
                 <div>
                   <Icon size={20} />
                   <span>{number}</span>
@@ -80,12 +90,12 @@ export function Research() {
                 <h3>{title}</h3>
                 <p>{desc}</p>
                 <span className="roadmap-status">
-                  {i < 6 ? (
+                  {i < 7 ? (
                     <>
                       <Check size={12} />
                       IMPLEMENTED
                     </>
-                  ) : i === 6 ? (
+                  ) : i === 7 ? (
                     'NEXT STAGE'
                   ) : (
                     'PLANNED'

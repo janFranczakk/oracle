@@ -1,0 +1,490 @@
+.research-page:has(.comparison-dashboard) {
+  padding: 0 var(--s-2) var(--s-4);
+}
+.comparison-dashboard {
+  max-width: 1760px;
+  margin: auto;
+}
+.comparison-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-6);
+  margin: var(--s-6) 0;
+}
+.comparison-heading h1 {
+  font-size: clamp(24px, 2.5vw, 36px);
+  font-weight: 550;
+  margin: var(--s-2) 0;
+  letter-spacing: -1px;
+}
+.comparison-heading p {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 0;
+}
+.comparison-workspace {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: var(--s-5);
+  align-items: start;
+}
+.comparison-controls,
+.comparison-results {
+  min-width: 0;
+}
+.comparison-controls {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.comparison-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+}
+.comparison-panel-heading > span:last-child {
+  color: var(--dim);
+  font: 9px var(--mono);
+}
+.comparison-field {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0 var(--s-4) var(--s-4);
+  color: var(--dim);
+  font: 9px var(--mono);
+}
+.comparison-field input,
+.comparison-field select,
+.comparison-toolbar select,
+.comparison-checkpoint-detail input {
+  min-width: 0;
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 9px;
+  color: var(--text);
+  font: 10px var(--mono);
+}
+.comparison-caption {
+  color: var(--dim);
+  font-size: 10px;
+  line-height: 1.7;
+  margin: var(--s-3) var(--s-4);
+}
+.checkpoint-roster {
+  max-height: 330px;
+  overflow-y: auto;
+  margin: 0 var(--s-2);
+}
+.checkpoint-roster::-webkit-scrollbar {
+  width: 4px;
+}
+.checkpoint-roster::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: var(--r-sm);
+}
+.comparison-checkpoint {
+  padding: var(--s-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  margin: 0 0 var(--s-2);
+}
+.comparison-checkpoint.selected {
+  border-color: var(--cyan-dim);
+  background: #18303980;
+}
+.comparison-checkpoint.archived {
+  opacity: 0.65;
+}
+.comparison-checkpoint > label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font: 10px var(--mono);
+  cursor: pointer;
+}
+.comparison-checkpoint > label > span {
+  margin-left: auto;
+  color: var(--dim);
+}
+.comparison-checkpoint input,
+.comparison-groups input,
+.comparison-archive-toggle input {
+  accent-color: var(--cyan);
+}
+.checkpoint-inspect {
+  display: block;
+  text-align: left;
+  width: 100%;
+  padding: var(--s-2) 0;
+  font: 9px var(--mono);
+  overflow-wrap: anywhere;
+}
+.checkpoint-inspect small {
+  display: block;
+  color: var(--dim);
+  font: 8px var(--mono);
+  margin-top: 7px;
+}
+.checkpoint-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--dim);
+  font: 8px var(--mono);
+}
+.checkpoint-actions button {
+  padding: var(--s-1);
+}
+.checkpoint-actions .active {
+  color: var(--cyan);
+}
+.comparison-archive-toggle {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  margin: var(--s-3) var(--s-4) var(--s-5);
+  font-size: 10px;
+  color: var(--muted);
+}
+.comparison-groups {
+  border: 0;
+  margin: 0 var(--s-4) var(--s-4);
+  padding: 0;
+}
+.comparison-groups legend {
+  color: var(--dim);
+  font: 9px var(--mono);
+  margin-bottom: var(--s-2);
+}
+.comparison-groups label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--muted);
+  font-size: 10px;
+  margin: 7px 0;
+}
+.comparison-start {
+  width: calc(100% - 32px);
+  margin: 0 var(--s-4);
+}
+.comparison-results {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+.comparison-protocol {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
+.comparison-protocol h2 {
+  font-size: 20px;
+  font-weight: 500;
+  margin: var(--s-2) 0;
+}
+.comparison-protocol p {
+  margin: 0;
+  font-size: 10px;
+  color: var(--dim);
+}
+.comparison-complete {
+  font: 9px var(--mono);
+  color: var(--cyan);
+  white-space: nowrap;
+}
+.comparison-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+}
+.comparison-toolbar label {
+  color: var(--dim);
+  font: 8px var(--mono);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.comparison-toolbar select {
+  width: 210px;
+}
+.comparison-exports {
+  display: flex;
+  gap: var(--s-2);
+}
+.comparison-exports .button {
+  font-size: 10px;
+  padding: 9px;
+}
+.comparison-table-scroll {
+  overflow-x: auto;
+  margin: 0 var(--s-5);
+}
+.comparison-table-scroll table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font: 11px var(--mono);
+}
+.comparison-table-scroll th {
+  font-size: 8px;
+  color: var(--dim);
+  font-weight: 400;
+  text-align: right;
+  padding: var(--s-3) var(--s-2);
+  white-space: nowrap;
+}
+.comparison-table-scroll th:first-child {
+  text-align: left;
+}
+.comparison-table-scroll td {
+  text-align: right;
+  padding: var(--s-4) var(--s-2);
+  border-top: 1px solid var(--line);
+}
+.comparison-table-scroll tbody th {
+  border-top: 1px solid var(--line);
+}
+.comparison-table-scroll strong {
+  color: var(--text);
+  font-weight: 500;
+  font-size: 11px;
+}
+.comparison-table-scroll th i,
+.comparison-legend i {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin-right: 7px;
+  background: var(--dim);
+}
+.comparison-table-scroll th span,
+.comparison-table-scroll small {
+  display: block;
+  color: var(--dim);
+  font: 8px var(--mono);
+  margin-top: var(--s-2);
+}
+.comparison-chart-panel {
+  border-top: 1px solid var(--line);
+  margin-top: var(--s-4);
+}
+.comparison-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  color: var(--dim);
+  font: 8px var(--mono);
+}
+.comparison-chart {
+  height: 230px;
+  margin: 0 var(--s-4);
+}
+.comparison-horizons {
+  display: flex;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-5);
+}
+.comparison-horizons button {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 6px 12px;
+  font: 9px var(--mono);
+  color: var(--dim);
+}
+.comparison-horizons .selected {
+  color: var(--cyan);
+  background: var(--cyan-dim);
+  border-color: var(--cyan-dim);
+}
+.comparison-detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  padding: var(--s-4) var(--s-5);
+  gap: var(--s-4);
+  border-top: 1px solid var(--line);
+}
+.comparison-detail-metrics span {
+  font: 9px var(--mono);
+}
+.comparison-detail-metrics strong {
+  display: block;
+  font: 24px var(--mono);
+  margin: var(--s-2) 0;
+}
+.comparison-detail-metrics small {
+  color: var(--dim);
+  font: 10px var(--mono);
+  margin-left: var(--s-2);
+}
+.comparison-detail-metrics p {
+  font: 9px var(--mono);
+  color: var(--dim);
+  margin: 0;
+}
+.comparison-provenance {
+  padding: var(--s-4) var(--s-5);
+  border-top: 1px solid var(--line);
+}
+.comparison-provenance summary {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  color: var(--muted);
+  font: 10px var(--mono);
+  cursor: pointer;
+}
+.comparison-provenance p {
+  color: var(--dim);
+  font-size: 10px;
+  line-height: 1.7;
+}
+.comparison-provenance code,
+.comparison-checkpoint-detail code {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 9px;
+}
+.comparison-batches,
+.comparison-checkpoint-detail {
+  border-top: 1px solid var(--line);
+}
+.comparison-batch-list {
+  max-height: 150px;
+  overflow: auto;
+  padding: 0 var(--s-3) var(--s-3);
+}
+.comparison-batch-list button {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+  padding: var(--s-3);
+  border-radius: var(--r-sm);
+  font: 9px var(--mono);
+  color: var(--muted);
+}
+.comparison-batch-list .selected {
+  color: var(--cyan);
+  background: var(--cyan-dim);
+}
+.comparison-batch-list strong {
+  font-weight: 400;
+}
+.comparison-empty {
+  padding: 64px var(--s-8);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: var(--s-4);
+  color: var(--cyan);
+}
+.comparison-empty h2 {
+  color: var(--text);
+  font-size: 26px;
+  font-weight: 500;
+  margin: 0;
+}
+.comparison-empty p {
+  color: var(--dim);
+  font-size: 12px;
+  line-height: 1.8;
+  max-width: 440px;
+  margin: 0;
+}
+.comparison-empty > div {
+  display: flex;
+  gap: var(--s-6);
+  margin-top: var(--s-6);
+  color: var(--dim);
+  font: 8px var(--mono);
+}
+.comparison-message {
+  margin-bottom: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: var(--muted);
+  font-size: 11px;
+}
+.comparison-message.error {
+  color: var(--red);
+  border-color: #e6929250;
+}
+.batch-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-6);
+  color: var(--cyan);
+}
+.batch-progress > div {
+  flex: 1;
+}
+.batch-progress p {
+  color: var(--dim);
+  font-size: 10px;
+}
+.batch-progress progress {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--cyan);
+}
+.batch-progress > span {
+  font: 10px var(--mono);
+}
+.comparison-checkpoint-detail > p,
+.comparison-checkpoint-detail > code {
+  margin: 0 var(--s-5) var(--s-3);
+  color: var(--dim);
+  font-size: 10px;
+}
+.comparison-checkpoint-detail > div:last-child {
+  padding: 0 var(--s-5) var(--s-5);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--s-3);
+}
+.comparison-checkpoint-detail label {
+  display: grid;
+  gap: var(--s-2);
+  color: var(--dim);
+  font: 8px var(--mono);
+  flex: 1;
+  min-width: 150px;
+}
+@media (max-width: 1150px) {
+  .comparison-workspace {
+    grid-template-columns: 230px minmax(0, 1fr);
+  }
+  .comparison-heading {
+    align-items: start;
+  }
+}
+@media (max-width: 800px) {
+  .comparison-workspace {
+    grid-template-columns: 1fr;
+  }
+  .comparison-heading {
+    flex-wrap: wrap;
+  }
+  .comparison-protocol {
+    flex-wrap: wrap;
+  }
+}
