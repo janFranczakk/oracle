@@ -6,7 +6,7 @@
 
 ORACLE studies the gap between what a controlled physical world does and what a learned dynamics model predicts. The intended workflow is observation → intervention → model prediction → ground-truth execution → measured error.
 
-**Stages 1–4 are implemented:** a deterministic 2D laboratory, reproducible datasets, real object-centric PyTorch MLP / GRU training and the Prediction Lab. Research shows measured losses and held-out evaluation. The Lab renders learned ghost trajectories alongside a separate Pymunk future, with an independent forecast cursor, measured errors and provenance-rich JSON exports.
+**Stages 1–5 are implemented:** a deterministic 2D laboratory, reproducible datasets, real object-centric PyTorch MLP / GRU training, the Prediction Lab and immutable counterfactual branches. Research shows measured losses and held-out evaluation. Counterfactual Lab freezes an observed source, previews interventions, compares learned alternatives and executes Pymunk reality on a separate explicit request. Both workspaces expose measured errors and provenance-rich JSON exports.
 
 ## Core idea
 
@@ -21,6 +21,7 @@ oracle/
 │   │   ├── datasets/  # sampling, storage, train normalization, workers
 │   │   ├── models/    # shared object encoder, MLP / GRU, checkpoint-backed prediction
 │   │   ├── prediction/# real-history capture, isolated inference, replay reference, metrics
+│   │   ├── counterfactual/ # immutable plans, interventions, conditioning, isolated execution
 │   │   └── training/  # sequences, optimization, checkpointing, metrics, evaluation
 │   ├── tests/         # deterministic replay and API tests
 │   ├── pyproject.toml
@@ -32,6 +33,7 @@ oracle/
 │   │   ├── components/# object inspector
 │   │   ├── rendering/ # PixiJS scene and camera geometry
 │   │   ├── prediction/# model selection, ghost controls, measured forecast errors
+│   │   ├── counterfactual/ # branch tree, intervention preview, comparative futures
 │   │   ├── research/  # dataset explorer, training dashboard, measured rollout charts
 │   │   ├── state/     # typed observation store
 │   │   └── timeline/  # recorded state scrubbing and transport
@@ -43,10 +45,11 @@ oracle/
 ├── STAGE_1_REPORT.md
 ├── STAGE_2_REPORT.md
 ├── STAGE_3_REPORT.md
-└── STAGE_4_REPORT.md
+├── STAGE_4_REPORT.md
+└── STAGE_5_REPORT.md
 ```
 
-[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Prediction Lab](docs/PREDICTION.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3](STAGE_3_REPORT.md) · [Stage 4 report](STAGE_4_REPORT.md)
+[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Prediction Lab](docs/PREDICTION.md) · [Counterfactual Lab](docs/COUNTERFACTUAL.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3](STAGE_3_REPORT.md) · [Stage 4](STAGE_4_REPORT.md) · [Stage 5 report](STAGE_5_REPORT.md)
 
 Contributor rules: [AGENTS.md](AGENTS.md) · [Git and review workflow](docs/REPOSITORY_WORKFLOW.md). Substantial changes use separate branches and Pull Requests into `main`. GitHub Actions checks the backend on Linux / Windows and the frontend tests, lint, formatting and production build.
 
@@ -64,11 +67,13 @@ Stage 3 implements object encoder → pooled scene context → shared temporal M
 
 ## Counterfactual reasoning
 
-You can pause, edit a body, collect fresh observations and compare its learned forecast with a physical future. Editing a past frame starts a new recording from that frame. Explicit counterfactual trees, immutable alternatives and intervention-conditioned models enter in Stage 5. Neutral replay trails are **recorded observations**; violet ghosts are learned outputs; cyan future traces are the separately executed Pymunk reference.
+Counterfactual Lab captures a paused observation and its source journal. Preview mass, velocity, direction, material or geometry changes; insert, duplicate or remove bodies; save alternatives in an immutable tree. Children inherit interventions at the same observed source tick. Predict each alternative with verified weights, then separately **Run reality** to measure the error. Overlay / split views share a sampled cursor and camera. Neither operation changes the live world. Neutral replay trails are **recorded observations**; violet ghosts are learned outputs; cyan future traces are separately executed Pymunk reality.
+
+Stage 5 uses explicit derived-history conditioning of the existing MLP / GRU: preserve original observations, override the terminal state, project removed identities out, and label repeated anchor placeholders for added bodies as synthetic inputs. These models were not trained on interventions; results are exploratory and uncertainty is unestimated. [Conditioning and branch contract](docs/COUNTERFACTUAL.md).
 
 ## Prediction pipeline
 
-In the Lab: paused real observation history → verified trained weights → autoregressive rollout → violet ghosts / separate forecast cursor → measured errors against an independently replayed Pymunk reference. Both futures hold the anchor's conditions and leave live physics untouched. Inference runs in a bounded CPU subprocess; stale anchors are rejected. Research / CLI retain separate held-out evaluation. Intervention conditioning and uncertainty remain later work. [Pipeline and measurement contract](docs/PREDICTION.md).
+In the Lab: paused real observation history → verified trained weights → autoregressive rollout → violet ghosts / separate forecast cursor → measured errors against an independently replayed Pymunk reference. Both futures hold the anchor's conditions and leave live physics untouched. Inference runs in a bounded CPU subprocess; stale live anchors are rejected. Counterfactual Lab retains immutable source anchors even after live edits. Research / CLI retain separate held-out evaluation. Uncertainty remains unestimated. [Prediction measurement contract](docs/PREDICTION.md).
 
 ## Screenshots
 
@@ -86,7 +91,9 @@ In the Lab: paused real observation history → verified trained weights → aut
 
 ### Counterfactual Branches
 
-Screenshot reserved for Stage 5. Branches are not yet implemented.
+![Stage 5 immutable branches and intervention comparison](docs/screenshots/stage5-branches-1920.jpg)
+
+[Intervention preview at 1440×900](docs/screenshots/stage5-preview-1440.jpg) · [Predicted / actual at 1440×900](docs/screenshots/stage5-predicted-actual-1440.jpg)
 
 ### Predicted vs Actual
 
@@ -116,6 +123,8 @@ Screenshot reserved for Stage 5. Branches are not yet implemented.
 12. Inspect logged losses and the validation-selected checkpoint. Choose test / OOD groups and rollout horizons, compare with the constant-velocity reference, and export evaluation JSON.
 13. Return to **Lab → Prediction**, select a completed model and pause the world. **Record observations** collects the real history needed by its sampling clock.
 14. Choose the horizon and **Predict future**. Scrub the separate forecast, compare violet learned ghosts / cyan Pymunk actual, select a body and inspect measured errors. Expand **Forecast settings** to change model / horizon; export the actual report JSON. Edits, seeks and real playback clear stale predictions.
+15. Open **Counterfactual**, record any missing real history and **Capture source**. Choose a body, preview an intervention and **Save alternative**. Select a parent before creating a child; all changes use the original observed anchor.
+16. **Predict future** uses real model weights. **Run reality** separately executes the branch in Pymunk. Compare alternatives or predicted / actual using overlay / split and the shared cursor. Save plans locally or export the full JSON report. Imported plans are replay-validated and require fresh computed futures.
 
 ## Installation
 
@@ -161,6 +170,7 @@ Verification:
 cd frontend
 pnpm test
 pnpm run lint
+pnpm exec prettier --check src
 pnpm run build
 pnpm run preview
 ```
@@ -227,14 +237,14 @@ The Lab displays observed physical state and **translational kinetic energy**, e
 | 2 | Dataset engine, splits, normalization, data explorer | Implemented and verified |
 | 3 | Object encoder, MLP / GRU, training, validation and rollout evaluation | Implemented and verified |
 | 4 | Learned rollout, ghost futures and prediction error | Implemented and verified |
-| 5 | Interventions, branch trees and comparative futures | Planned |
+| 5 | Interventions, branch trees and comparative futures | Implemented and verified |
 | 6 | Transformer, object attention and uncertainty | Planned |
 | 7 | Model comparison, OOD suites and batch reports | Planned |
 | 8 | Planning through learned model rollouts | Planned |
 
 ## Limitations
 
-Local prototype: no accounts, remote hosting or persistent session database. Collection, training and inference use separate processes. Browser snapshots are limited to eight; export important experiments. Recordings stop at 120 simulated seconds, scenes support 64 objects and experiments 512 edits. Seeks replay from the start. Predictions require compatible real history after edits, support up to 120 observed future steps and time out after 45 seconds. Each request starts a fresh CPU worker; startup latency remains. The physical reference ignores edits recorded after its anchor. Use ordinary speeds and avoid heavy initial overlaps. Small learned baselines have substantial OOD / long-horizon drift; Lab scenes are not certified in-distribution. CUDA training is guarded but unverified. Checkpoints remain local; UI training cancellation / resume, intervention branches, advanced comparison, uncertainty and 3D are future work. Stage reports record actual verification coverage.
+Local prototype: no accounts, remote hosting or persistent session database. Collection, training and inference use separate processes. Browser world snapshots are limited to eight; counterfactual plans to two locally / four per live session, with 16 branches and eight intervention levels. Export important experiments. Recordings stop at 120 simulated seconds, scenes support 64 objects and experiments 512 edits. Seeks replay from the start. Predictions require compatible real history after edits, support up to 120 observed future steps and time out after 45 seconds. Each request starts a fresh CPU worker; startup latency remains. The physical reference ignores edits recorded after its anchor. Use ordinary speeds and avoid heavy initial overlaps. Small learned baselines have substantial OOD / long-horizon drift; Lab scenes are not certified in-distribution. Added-body history in counterfactual model inputs is explicitly synthetic. CUDA training is guarded but unverified. Checkpoints remain local; intervention-specific training, UI training cancellation / resume, advanced batch comparison, uncertainty and 3D are future work. Stage reports record actual verification coverage.
 
 ## Research questions
 

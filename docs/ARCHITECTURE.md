@@ -103,16 +103,40 @@ The paused Lab freezes real sampled observations and the experiment journal thro
 
 `prediction/` owns catalog, capture, supervision, replay and metrics. `oracle.predict` owns worker inference. Session envelopes add transient generation and last edit tick, preserving portable Experiment schema 1. Both server and Zustand reject predictions after generation / revision / tick / paused-state changes. The Pixi ghost layer and independent forecast cursor render exact sampled model / reference poses; the observation timeline still owns real playback. Recharts is loaded on demand for measured errors. [Prediction specification](PREDICTION.md) defines the clocks, API, provenance, metrics and bounds.
 
-## Stage 5–8 extension points
+## Stage 5 Counterfactual Lab
 
-`contracts.py` defines `DynamicsModel`, an object-centric frame-history input, typed interventions and a model-attributed `Prediction` result. Lab responses use the versioned `oracle-prediction-v1` schema with separate learned / physical-reference sources. Intervention conditioning is still rejected; uncertainty remains unset.
+`counterfactual/` owns strict portable source / branch schemas, pure immutable materialization, owner-scoped bounded storage, explicit derived-history conditioning and a separate worker. The router receives the existing session lookup and prediction supervisor. Stage 4 / 5 share a single worker slot; neither operation takes control of live session physics.
+
+```text
+paused observed source + origin / journal through anchor
+                         │
+                  immutable source snapshot
+                         │
+            branch ancestry → ordered interventions at same anchor
+                         │
+          ┌──────────────┴─────────────────────┐
+          ▼                                    ▼
+real past → explicit derived inputs      explicit Run reality
+verified MLP / GRU weights                Pymunk past replay + branch edits
+autoregressive learned future            isolated physical future
+          └──────────────┬─────────────────────┘
+                         ▼
+            matched frames → measured errors
+            branch comparison / shared cursor / report
+```
+
+`frontend/src/counterfactual/` keeps branch state separate from the live store, presents previews and a bounded tree, and renders exact returned poses in PixiJS overlay / split views. Shared drawing helpers preserve the existing Lab styling. A draft hides saved futures / measurements until committed or discarded. Browser plans persist locally; imported sources are replay-validated and imported metrics are ignored. [Counterfactual specification](COUNTERFACTUAL.md) defines conditioning, source identity, clocks, bounds and compatibility.
+
+## Stage 6–8 extension points
+
+`contracts.py` defines `DynamicsModel`, an object-centric frame-history input, typed interventions and a model-attributed `Prediction` result. Lab responses use `oracle-prediction-v1`; Counterfactual Lab uses portable plan / future / report v1 formats with separate sources. The direct learned adapter rejects opaque intervention arguments; Stage 5 explicitly derives its model window before calling the adapter. Intervention-specific training and uncertainty estimation remain future work.
 
 | Stage | Planned modules | Research boundary |
 | --- | --- | --- |
 | 2 — implemented | `datasets/`, headless collection / inspection | Seeded episodes; splits by episode; train-only normalization; explicit OOD ranges |
 | 3 — implemented | `models/`, `training/` | PyTorch encoder, MLP / GRU, checkpoints, one-step / autoregressive evaluation |
 | 4 — implemented | `prediction/` | Verified learned rollout, Lab ghost trajectories and per-object ground-truth error visualization |
-| 5 | `counterfactual/` | Immutable source observations, intervention branches, separate prediction and reality execution |
+| 5 — implemented | `counterfactual/` | Immutable source observations, explicit derived conditioning, branch trees, separate prediction and reality execution |
 | 6 | `models/attention/`, `uncertainty/` | Temporal Transformer, ensemble / MC dropout outputs with named estimation methods |
 | 7 | `experiments/`, `research/` | Matched-model evaluations, OOD suites, batch runs and honest reports |
 | 8 | `planning/` | Candidate actions ranked by learned rollouts and verified in reality |
@@ -121,4 +145,4 @@ V2 visual encoders can map rendered observations into the same temporal input bo
 
 ## Design system
 
-`frontend/src/styles.css` owns palette, spacing, radii, shadows, fonts and timing tokens. Graphite surfaces and cool cyan identify the laboratory; neutral traces represent recorded reality, violet identifies future ML capabilities. Manrope is the interface typeface; IBM Plex Mono is used for measurements. Both fonts are bundled locally. The viewport occupies about 76% of the desktop workspace width at 1440 and about 80% at 1920. Inspectors scroll within their boundary rather than over the scene.
+`frontend/src/styles.css` owns palette, spacing, radii, shadows, fonts and timing tokens. Graphite surfaces and cool cyan identify the laboratory; neutral traces represent recorded reality, violet identifies learned futures. Manrope is the interface typeface; IBM Plex Mono is used for measurements. Both fonts are bundled locally. The live Lab viewport occupies about 76% of the desktop workspace width at 1440 and about 80% at 1920. Counterfactual Lab also allocates space to a branch tree and an execution inspector. Inspectors scroll within their boundary rather than over the scene.
