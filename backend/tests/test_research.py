@@ -1,5 +1,6 @@
 """Actual fixed weights and common targets across histories; isolated persistent batches."""
 
+import shutil
 import subprocess
 import sys
 from datetime import UTC, datetime, timedelta
@@ -248,3 +249,17 @@ def test_deadline_kills_owned_worker_and_marks_report_failed(study, tmp_path):
     assert worker.killed
     assert service.status("timeout")["status"] == "failed"
     assert "deadline" in service.status("timeout")["error"]
+
+
+def test_cli_engine_rejects_valid_weights_from_incomplete_training(study, tmp_path):
+    directory = tmp_path / "incomplete"
+    directory.mkdir()
+    source = Path(study[3][0]["path"])
+    shutil.copyfile(source, directory / "best.pt")
+    shutil.copyfile(source.with_suffix(".metadata.json"), directory / "best.metadata.json")
+    write_json(directory / "status.json", {"status": "running"})
+    entries = [{**entry} for entry in study[3]]
+    entries[0]["path"] = str(directory / "best.pt")
+    with pytest.raises(ValueError, match="training runs to complete"):
+        run_batch(study[1], tmp_path / "unpublished", batch(study), entries)
+    assert not (tmp_path / "unpublished/report.json").exists()

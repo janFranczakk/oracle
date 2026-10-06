@@ -87,6 +87,8 @@ def run_batch(dataset: Path, output: Path, request: BatchRequest, checkpoints: l
         loaded = []
         for entry in checkpoints:
             path = Path(entry["path"])
+            if read_json(path.parent / "status.json")["status"] != "complete":
+                raise ValueError("Wait for all selected training runs to complete")
             if file_hash(path) != entry["sha256"]:
                 raise ValueError("A selected checkpoint changed after batch submission")
             model, metadata = load_checkpoint(path)
