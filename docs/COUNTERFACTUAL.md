@@ -21,7 +21,7 @@ The policy is `terminal_state_override_v1`, applied to verified Stage 3 MLP / GR
 
 The existing direct `DynamicsModel.predict(history, intervention, ...)` contract still rejects opaque intervention arguments. The Counterfactual Lab supplies a separately documented derived window and calls the learned adapter with no direct intervention argument. This preserves the existing checkpoint format and avoids implying intervention-specific training. The adapter uses only actual learned weights for future dynamics; no Pymunk future or physical reference is supplied to it.
 
-MLP / GRU were trained on ordinary episodes, not intervention pairs. Forecasts can drift substantially, especially with new identities, large changes or long horizons. Dataset membership is not certified. No attention interpretation, calibrated confidence or uncertainty estimate is invented; uncertainty is null.
+MLP / GRU / Transformer were trained on ordinary episodes, not intervention pairs. Forecasts can drift substantially, especially with new identities, large changes or long horizons. Dataset membership is not certified. Stage 6 optionally samples Transformer MC dropout paths and shows actual anchor attention weights. Neither calibrated confidence nor causal interpretation is implied. Matching explicit reality execution adds observed interval quality to the comparison; prediction alone contains no ground-truth measurement. See [advanced models](ADVANCED_MODELS.md).
 
 ## Explicit physical execution and measurements
 
