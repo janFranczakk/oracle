@@ -132,6 +132,4 @@ Planning changes velocity once and searches nine actions, with no global optimal
 CUDA, mobile, hosted multi-user operation and cross-platform bitwise determinism are
 unverified. The release report retains measured failures and remaining limitations.
 
-Historical evidence: [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md)
-· [Stage 3](STAGE_3_REPORT.md) · [Stage 4](STAGE_4_REPORT.md) · [Stage 5](STAGE_5_REPORT.md)
-· [Stage 6](STAGE_6_REPORT.md) · [Stage 7](STAGE_7_REPORT.md) · [Stage 8](STAGE_8_REPORT.md).
+Historical evidence: [Stages 1–8 report](STAGES_1_8_REPORT.md).

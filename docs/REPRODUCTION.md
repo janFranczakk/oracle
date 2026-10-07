@@ -112,7 +112,7 @@ Defaults: CPU, two threads, history four observed frames, 64-dimensional embeddi
 .\.venv\Scripts\python.exe -m oracle.evaluate checkpoints/gru/best.pt --dataset datasets/demo --output experiments/gru-evaluation.json
 ```
 
-Report one-step position / velocity MSE, periodic rotation MAE, contact classification and autoregressive ADE / FDE at 1 / 5 / 10 / 20 / 50 observed steps. Validation, test and six OOD suites stay separate. The same samples also score a named constant-velocity analytical reference. No confidence estimates are invented. [Measured results and limitations](../STAGE_3_REPORT.md).
+Report one-step position / velocity MSE, periodic rotation MAE, contact classification and autoregressive ADE / FDE at 1 / 5 / 10 / 20 / 50 observed steps. Validation, test and six OOD suites stay separate. The same samples also score a named constant-velocity analytical reference. No confidence estimates are invented. [Measured results and limitations](../STAGES_1_8_REPORT.md#stage-3--learned-world-model).
 
 For matched multi-checkpoint evaluation, use **Research → Checkpoint comparison** or:
 
@@ -120,7 +120,7 @@ For matched multi-checkpoint evaluation, use **Research → Checkpoint compariso
 .\.venv\Scripts\python.exe -m oracle.research_batch --dataset datasets/demo --checkpoint checkpoints/mlp/best.pt --checkpoint checkpoints/gru/best.pt --output experiments/research/comparison-demo
 ```
 
-The common observation start uses the longest selected history. Reports retain exact anchors, supported/omitted horizons, hashes, measured CPU timing and separate test/OOD results. [Research protocol, worker bounds and exports](RESEARCH.md) · [Actual Stage 7 results](../STAGE_7_REPORT.md).
+The common observation start uses the longest selected history. Reports retain exact anchors, supported/omitted horizons, hashes, measured CPU timing and separate test/OOD results. [Research protocol, worker bounds and exports](RESEARCH.md) · [Actual Stage 7 results](../STAGES_1_8_REPORT.md#stage-7-report--research-platform).
 
 ## Experiments
 

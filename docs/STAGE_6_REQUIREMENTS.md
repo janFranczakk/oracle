@@ -13,6 +13,6 @@
 
 ## Completion
 
-Meaningful mask, permutation, gradient, sampling/reproducibility, legacy compatibility and API tests; all existing CI gates; browser verification at 1440×900 and 1920×1080; screenshots, measured research results and limitations in `STAGE_6_REPORT.md`; logical commits and a reviewed Pull Request.
+Meaningful mask, permutation, gradient, sampling/reproducibility, legacy compatibility and API tests; all existing CI gates; browser verification at 1440×900 and 1920×1080; screenshots, measured research results and limitations in [Stage 6 report](../STAGES_1_8_REPORT.md#stage-6-report--advanced-world-models); logical commits and a reviewed Pull Request.
 
 No new physics implementation, intervention retraining, uncertainty calibration, formal safety certification or automatic merge is included.

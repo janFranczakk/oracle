@@ -17,7 +17,7 @@
 - Preserve object identities, SI units, versioned schemas, deterministic seeds and replay semantics. Determinism claims are limited to the verified runtime and platform.
 - Fit normalization on training episodes only. Keep validation, test and OOD separate; retain dataset and normalizer provenance in future checkpoints.
 - Keep collection and future training outside the API event loop. Preserve existing bounds, atomic publication and Windows sharing-violation handling.
-- Use `docs/ARCHITECTURE.md`, `docs/DATASETS.md` and the stage reports when evaluating compatibility. Document material schema or interface changes.
+- Use `docs/ARCHITECTURE.md`, `docs/DATASETS.md` and `STAGES_1_8_REPORT.md` when evaluating compatibility. Document material schema or interface changes.
 
 ## Code quality
 
@@ -59,7 +59,7 @@ The build includes strict TypeScript checking. Install Playwright Chromium and p
 
 Full intervention/repeated-seed studies are bounded local CLI research, not API/CI workloads. Preserve protected outputs, exact hashes, validation-only selection, explicit skips/missing values and negative results. Seed mean confidence intervals differ from uncalibrated MC-dropout quantiles. The final release pass closes Stages 1–8 with `RELEASE_1_0_REPORT.md`; do not invent another stage for release validation.
 
-A task is done when its scope is implemented, relevant automated and manual checks pass, compatibility and limitations are documented, and the final diff contains no accidental changes, secrets or generated files. Every completed stage needs its requirements, implementation, tests, manual verification and `STAGE_X_REPORT.md`.
+A task is done when its scope is implemented, relevant automated and manual checks pass, compatibility and limitations are documented, and the final diff contains no accidental changes, secrets or generated files. Every completed stage needs its requirements, implementation, tests and manual verification recorded in its section of `STAGES_1_8_REPORT.md`.
 
 ## Commits and review
 

@@ -1,6 +1,6 @@
 # Learned rollout planning
 
-Planning chooses a single velocity intervention using a learned dynamics model, then measures that choice in a separate physical experiment. [Stage 8 requirements](STAGE_8_REQUIREMENTS.md) · [Measured results](../STAGE_8_REPORT.md).
+Planning chooses a single velocity intervention using a learned dynamics model, then measures that choice in a separate physical experiment. [Stage 8 requirements](STAGE_8_REQUIREMENTS.md) · [Measured results](../STAGES_1_8_REPORT.md#stage-8-report--learned-rollout-planning).
 
 ## Source and action protocol
 

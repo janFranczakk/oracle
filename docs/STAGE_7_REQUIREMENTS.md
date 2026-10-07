@@ -20,4 +20,4 @@ Build on reviewed Stage 6 (`4090d8a`, merged PR #5) on `feature/research-platfor
 
 - CLI and API share the evaluation engine. Meaningful tests cover matched samples across differing history windows, compatibility/corruption rejection, job isolation/publication/failure, checkpoint metadata persistence and report export semantics.
 - No fitting on test/OOD; no simulator output masquerading as learned predictions; no invented confidence or rankings. Stage 6 uncertainty remains explicitly uncalibrated. Stage 8 planning is outside this change.
-- Pass backend tests/Ruff, frontend tests/ESLint/Prettier/strict TypeScript/build, hosted CI on Linux/Windows/frontend, final diff audit. Record real batch measurements, manual evidence and limitations in `STAGE_7_REPORT.md`.
+- Pass backend tests/Ruff, frontend tests/ESLint/Prettier/strict TypeScript/build, hosted CI on Linux/Windows/frontend, final diff audit. Record real batch measurements, manual evidence and limitations in [Stage 7 report](../STAGES_1_8_REPORT.md#stage-7-report--research-platform).
