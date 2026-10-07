@@ -40,6 +40,6 @@ python -m oracle.train --dataset datasets/ds-2cda3301ce8c3c5c --output checkpoin
 python -m oracle.evaluate checkpoints/stage6-transformer/best.pt --dataset datasets/ds-2cda3301ce8c3c5c --output experiments/stage6-evaluation.json --uncertainty
 ```
 
-Supply `--config` JSON to training to change heads/layers/dropout. Existing output paths are protected. Checkpoints and generated datasets remain local ignored artifacts; regenerate the dataset using the Stage 3 documented configuration and verify its fingerprint. Stage 6 measured results and manual UI verification are in [the report](../STAGE_6_REPORT.md).
+Supply `--config` JSON to training to change heads/layers/dropout. Existing output paths are protected. Checkpoints and generated datasets remain local ignored artifacts; regenerate the dataset using the Stage 3 documented configuration and verify its fingerprint. Stage 6 measured results and manual UI verification are in [the report](../STAGES_1_8_REPORT.md#stage-6-report--advanced-world-models).
 
-Stage 7 [Research comparisons](RESEARCH.md) compare completed MLP / GRU / Transformer point forecasts on shared held-out samples, with dropout off. This does not pool or calibrate MC dropout intervals; Stage 6 coverage measurement retains its separate protocol. [Stage 7 report](../STAGE_7_REPORT.md) records the actual checkpoint comparison and timing scope.
+Stage 7 [Research comparisons](RESEARCH.md) compare completed MLP / GRU / Transformer point forecasts on shared held-out samples, with dropout off. This does not pool or calibrate MC dropout intervals; Stage 6 coverage measurement retains its separate protocol. [Stage 7 report](../STAGES_1_8_REPORT.md#stage-7-report--research-platform) records the actual checkpoint comparison and timing scope.

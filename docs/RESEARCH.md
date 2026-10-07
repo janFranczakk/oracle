@@ -1,6 +1,6 @@
 # Matched research experiments
 
-Stage 7 adds **Research → Model comparison** and `oracle.research_batch`. Both evaluate fixed, completed MLP / GRU / Transformer checkpoints through the existing held-out scoring code. No optimization or new simulation runs occur during a comparison. [Requirements](STAGE_7_REQUIREMENTS.md) and [measured verification](../STAGE_7_REPORT.md).
+Stage 7 adds **Research → Model comparison** and `oracle.research_batch`. Both evaluate fixed, completed MLP / GRU / Transformer checkpoints through the existing held-out scoring code. No optimization or new simulation runs occur during a comparison. [Requirements](STAGE_7_REQUIREMENTS.md) and [measured verification](../STAGES_1_8_REPORT.md#stage-7-report--research-platform).
 
 ## Shared evidence
 

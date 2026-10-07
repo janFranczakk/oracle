@@ -1,6 +1,6 @@
 # Counterfactual Lab
 
-Stage 5 adds immutable alternatives to a real observed world. Requirements: [Stage 5](STAGE_5_REQUIREMENTS.md). Verification: [report](../STAGE_5_REPORT.md).
+Stage 5 adds immutable alternatives to a real observed world. Requirements: [Stage 5](STAGE_5_REQUIREMENTS.md). Verification: [report](../STAGES_1_8_REPORT.md#stage-5--counterfactual-lab).
 
 ## Source and branch semantics
 
