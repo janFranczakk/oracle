@@ -218,9 +218,10 @@ export function ExperimentDialog({
             <h2>What actually happens.</h2>
             <p>
               ORACLE is an interactive laboratory for learned world models and counterfactual
-              reasoning. Stages 1–3 provide a controlled physics world, reproducible datasets and
-              real MLP / GRU training. Research measures learned rollouts against held-out
-              observations.
+              experiments. Stages 1–8 provide reproducible datasets, real MLP / GRU / Transformer
+              training, immutable alternatives and bounded learned action search. Research measures
+              held-out errors and variation across training seeds. Intervention forecasts do not
+              establish causal understanding; dropout intervals remain uncalibrated.
             </p>
             <div className="about-principle">
               <Orbit size={24} />

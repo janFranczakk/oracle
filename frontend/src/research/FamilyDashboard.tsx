@@ -45,7 +45,10 @@ export function FamilyDashboard() {
           }
         })
         .catch((e) => {
-          if (!stopped) setError(e instanceof Error ? e.message : 'This study is unavailable.');
+          if (!stopped) {
+            setReport(null);
+            setError(e instanceof Error ? e.message : 'This study is unavailable.');
+          }
         });
     return () => {
       stopped = true;
@@ -203,6 +206,8 @@ export function FamilyDashboard() {
               </tbody>
             </table>
           </div>
+          <p className="comparison-caption">{active.provenance.confidence_method}</p>
+          <p className="comparison-caption">{active.interpretation}</p>
           <div className="comparison-table-scroll">
             <table aria-label="Family metric statistics">
               <thead>
@@ -243,8 +248,6 @@ export function FamilyDashboard() {
               </tbody>
             </table>
           </div>
-          <p className="comparison-caption">{active.provenance.confidence_method}</p>
-          <p className="comparison-caption">{active.interpretation}</p>
           <details className="family-provenance">
             <summary>Checkpoint provenance and shared schedules</summary>
             {active.families.flatMap((f) =>

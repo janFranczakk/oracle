@@ -22,6 +22,9 @@ describe('family comparison preserves measured repeats', () => {
     expect(meanSpread({ ...stats, n: 1, std: null, mean_ci95: null })).toBe('2.000 ± —');
     expect(meanSpread({ ...stats, n: 0, mean: null })).toBe('—');
   });
+  it('keeps small measured variance visible instead of rounding it to zero', () => {
+    expect(meanSpread({ ...stats, mean: 0.002516, std: 0.000376 })).toBe('2.52e-3 ± 3.76e-4');
+  });
   it('pairs exact group, scope, horizon and metric without nearest-horizon substitution', () => {
     const family: SeedStudy['families'][number] = {
       family: 'gru',

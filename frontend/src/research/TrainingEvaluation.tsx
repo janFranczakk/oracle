@@ -182,7 +182,7 @@ export function TrainingEvaluation({ current }: { current: RunDetail | null }) {
               <span className="eyebrow">MC DROPOUT / OBSERVED INTERVAL QUALITY</span>
               <p>
                 {current.uncertainty.samples} paths per anchor · Seed {current.uncertainty.seed} ·
-                5–95% marginal quantiles · No calibration fitted.
+                5–95% marginal quantiles · Uncalibrated; no calibration fitted.
               </p>
               <table>
                 <thead>

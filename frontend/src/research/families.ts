@@ -67,5 +67,7 @@ export function familyMetric(
 }
 export function meanSpread(stats: SampleStatistics | undefined, digits = 3) {
   if (stats?.mean == null) return '—';
-  return `${stats.mean.toFixed(digits)} ± ${stats.std == null ? '—' : stats.std.toFixed(digits)}`;
+  const format = (value: number) =>
+    value !== 0 && Math.abs(value) < 0.01 ? value.toExponential(2) : value.toFixed(digits);
+  return `${format(stats.mean)} ± ${stats.std == null ? '—' : format(stats.std)}`;
 }

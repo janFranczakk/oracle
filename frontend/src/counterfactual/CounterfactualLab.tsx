@@ -816,8 +816,9 @@ export function CounterfactualLab() {
           <div className="branch-integrity-note">
             <ShieldCheck size={14} />
             <p>
-              Exploratory intervention forecasts. Models were trained on ordinary episodes;
-              intervention accuracy is unverified. Confidence is not estimated.
+              Exploratory intervention forecasts. Models were trained on ordinary episodes; accuracy
+              depends on the intervention and source. Compare with explicit reality; confidence is
+              not estimated.
             </p>
           </div>
         </aside>
