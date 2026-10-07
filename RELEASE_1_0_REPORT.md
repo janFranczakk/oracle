@@ -210,14 +210,10 @@ for seven days. All four hosted jobs passed on candidate revision `c3cd483` in
 [CI run 37653244527](https://github.com/janFranczakk/oracle/actions/runs/37653244527)
 before version promotion. Backend package/API and frontend package/UI now identify
 1.0.0. The release PR retains the same four required CI gates after this promotion;
-current revision results are recorded on [PR #8](https://github.com/janFranczakk/oracle/pull/8).
-
-Delivery status on 2026-10-07: GitHub repeatedly rejected the final 1.0.0 push
-with server-side HTTP 500. The remote PR remains a draft on `c3cd483`; the version
-promotion and final local validation commits are preserved on `release/oracle-1.0`.
-Final-version hosted CI has not run yet. Complete an ordinary push and verify all
-four jobs before marking the PR ready. The successful candidate CI is not presented
-as CI for the still-local 1.0.0 revision.
+current revision results are recorded on [PR #9](https://github.com/janFranczakk/oracle/pull/9).
+Version 1.0.0 is synchronized to GitHub. All four required jobs are checked on the
+final PR revision before marking it ready for review. The earlier candidate result
+is retained separately as evidence that CI preceded version promotion.
 
 ## E2E
 
@@ -289,9 +285,9 @@ as a release asset. Prediction, Counterfactual and Planning use real demo weight
 
 The requested implementation, real studies, protected demo, targeted refactor and local
 automated/manual regression gates are complete. All four hosted candidate CI jobs passed
-before local promotion to 1.0.0. Remote delivery and final-version hosted CI remain
-pending because GitHub rejects writes with HTTP 500; PR #8 remains a draft.
-The implementation is ready locally as a functional, reproducible and honestly evaluated portfolio project:
+before promotion to 1.0.0. The release branch is synchronized to GitHub; final-version
+checks and review are tracked in PR #9. The implementation is ready as a functional,
+reproducible and honestly evaluated portfolio project:
 it predicts short controlled trajectories, measures intervention errors and compares seeds;
 multi-metre long forecasts, uncertain contacts, uncalibrated uncertainty and bounded planning
 prevent claims of reliable general physics, causal understanding or global goal solving.
