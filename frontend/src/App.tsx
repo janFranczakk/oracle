@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { version } from '../package.json';
 import {
   Activity,
   ArrowRight,
@@ -342,7 +343,7 @@ export function App() {
           <img src="/oracle.svg" alt="" />
           <div>
             <strong>
-              ORACLE<span className="brand-version"> / 08</span>
+              ORACLE<span className="brand-version"> / 10</span>
             </strong>
             <span>COUNTERFACTUAL PHYSICS LAB</span>
           </div>
@@ -386,7 +387,7 @@ export function App() {
                 ? 'CONNECTING'
                 : 'ENGINE OFFLINE'}
           </span>
-          <span className="version-pill">v0.8.0</span>
+          <span className="version-pill">v{version}</span>
         </div>
       </header>
       <div className="app-body">

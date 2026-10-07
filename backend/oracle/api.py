@@ -13,6 +13,7 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import Field, ValidationError
 
+from oracle import __version__
 from oracle.counterfactual.api import create_router as counterfactual_router
 from oracle.counterfactual.plans import PlanStore
 from oracle.datasets.api import router as dataset_router
@@ -88,7 +89,7 @@ async def lifespan(_app: FastAPI):
         await task
 
 
-app = FastAPI(title="ORACLE · Research API", version="0.8.0", lifespan=lifespan)
+app = FastAPI(title="ORACLE · Research API", version=__version__, lifespan=lifespan)
 app.include_router(dataset_router)
 app.include_router(training_router)
 app.include_router(research_router)
