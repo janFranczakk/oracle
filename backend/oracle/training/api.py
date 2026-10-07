@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException
 from oracle.datasets.api import PROJECT_ROOT
 from oracle.datasets.api import service as datasets
 from oracle.datasets.storage import read_json, read_manifest, write_json
+from oracle.paths import ARTIFACT_ROOT
 from oracle.training.schema import TrainRequest
 
 router = APIRouter(prefix="/api/training", tags=["Learned dynamics training"])
@@ -165,7 +166,7 @@ class TrainingService:
         return self.status(identity)
 
 
-service = TrainingService(PROJECT_ROOT / "checkpoints")
+service = TrainingService(ARTIFACT_ROOT / "checkpoints")
 
 
 @router.get("/runs")

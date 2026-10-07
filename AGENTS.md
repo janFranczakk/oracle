@@ -50,10 +50,14 @@ pnpm install --frozen-lockfile
 pnpm test
 pnpm run lint
 pnpm exec prettier --check src
+pnpm exec tsc --project tsconfig.e2e.json
 pnpm run build
+pnpm run test:e2e
 ```
 
-The build includes strict TypeScript checking. Windows virtual-environment commands are in README. Run checks appropriate to each substantial change and the complete relevant CI gate before delivery. Report failures and fix their causes; do not weaken checks to conceal failures.
+The build includes strict TypeScript checking. Install Playwright Chromium and prepare the protected `.run/e2e` real smoke fixture before E2E; see `docs/DEMO_AND_E2E.md`. Include `pip check` in backend gates. Windows virtual-environment commands are in README. Run checks appropriate to each substantial change and the complete relevant CI gate before delivery. Report failures and fix their causes; do not weaken checks to conceal failures.
+
+Full intervention/repeated-seed studies are bounded local CLI research, not API/CI workloads. Preserve protected outputs, exact hashes, validation-only selection, explicit skips/missing values and negative results. Seed mean confidence intervals differ from uncalibrated MC-dropout quantiles. The final release pass closes Stages 1–8 with `RELEASE_1_0_REPORT.md`; do not invent another stage for release validation.
 
 A task is done when its scope is implemented, relevant automated and manual checks pass, compatibility and limitations are documented, and the final diff contains no accidental changes, secrets or generated files. Every completed stage needs its requirements, implementation, tests, manual verification and `STAGE_X_REPORT.md`.
 

@@ -13,10 +13,11 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import Field, ValidationError
 
+from oracle import __version__
 from oracle.counterfactual.api import create_router as counterfactual_router
 from oracle.counterfactual.plans import PlanStore
-from oracle.datasets.api import PROJECT_ROOT
 from oracle.datasets.api import router as dataset_router
+from oracle.paths import ARTIFACT_ROOT
 from oracle.planning.api import create_router as planning_router
 from oracle.planning.store import PlanningStore
 from oracle.prediction.context import capture, matches
@@ -31,7 +32,7 @@ from oracle.world import BodyState, EditEvent, Experiment, StrictModel
 sessions: dict[str, Session] = {}
 clients: dict[str, set[WebSocket]] = {}
 last_revision: dict[str, int] = {}
-predictions = PredictionService(PROJECT_ROOT / "checkpoints")
+predictions = PredictionService(ARTIFACT_ROOT / "checkpoints")
 counterfactuals = PlanStore()
 planning = PlanningStore()
 
@@ -88,7 +89,7 @@ async def lifespan(_app: FastAPI):
         await task
 
 
-app = FastAPI(title="ORACLE · Research API", version="0.8.0", lifespan=lifespan)
+app = FastAPI(title="ORACLE · Research API", version=__version__, lifespan=lifespan)
 app.include_router(dataset_router)
 app.include_router(training_router)
 app.include_router(research_router)

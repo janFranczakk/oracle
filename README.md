@@ -1,285 +1,137 @@
 # ORACLE
 
-**Counterfactual Physics Lab** · Interactive laboratory for learned world models and counterfactual reasoning.
+**Counterfactual Physics Lab** — a local AI research laboratory that keeps learned predictions separate from physical reality.
 
-## What is ORACLE?
+| Workspace | What it does |
+| --- | --- |
+| Physics engine | Pymunk computes what actually happens. |
+| World model | Trained MLP / GRU / Transformer weights predict what will happen. |
+| Counterfactual Lab | The model predicts what would happen after controlled changes; a separate Pymunk execution measures the error. |
+| Planning | Nine velocity actions are ranked by predicted distance to a goal; the fixed winner is verified in reality. |
 
-ORACLE studies the gap between what a controlled physical world does and what a learned dynamics model predicts. The intended workflow is observation → intervention → model prediction → ground-truth execution → measured error.
+Stages 1–8 are implemented. **FINAL VALIDATION & RELEASE** adds intervention benchmarks,
+repeated training seeds, real browser E2E and a protected demo. **Version 1.0.0** was
+promoted after all four hosted CI jobs passed. Counterfactual conditioning does
+not establish causal understanding; planning is bounded search; MC-dropout remains **uncalibrated**.
 
-**Stages 1–8 are implemented:** a deterministic 2D laboratory, reproducible datasets, real object-centric PyTorch MLP / GRU / Transformer training, the Prediction Lab and immutable counterfactual branches. The Transformer adds masked object attention, temporal attention and seeded MC dropout position intervals. Research reports measured test/OOD coverage and interval width, and compares fixed checkpoints on identical held-out targets and rollout anchors. Batch reports include real CPU timing, provenance and JSON/CSV exports; checkpoint labels, pins and archival are reversible. Planning ranks nine velocity actions by learned endpoint distance to a goal, then separately verifies the fixed winner in Pymunk. Counterfactual and Planning workspaces expose separate predicted/actual measurements and portable JSON reports.
+## Quick Start — Fast Demo
 
-## Core idea
-
-The simulator knows physical dynamics. Future models learn from recorded object observations, without receiving handwritten collision behavior or physics equations as their prediction implementation. Model outputs must remain distinct from simulator outputs.
-
-## Architecture
-
-```text
-oracle/
-├── backend/
-│   ├── oracle/        # physics, sessions, API, model contracts, dataset CLI
-│   │   ├── datasets/  # sampling, storage, train normalization, workers
-│   │   ├── models/    # object encoder, MLP / GRU / Transformer, dropout sampling
-│   │   ├── prediction/# real-history capture, isolated inference, replay reference, metrics
-│   │   ├── counterfactual/ # immutable plans, interventions, conditioning, isolated execution
-│   │   ├── training/  # sequences, optimization, checkpointing, metrics, evaluation
-│   │   ├── research/  # matched checkpoint batches, reports and reversible registry
-│   │   └── planning/  # bounded learned action search and explicit winner verification
-│   ├── tests/         # deterministic replay and API tests
-│   ├── pyproject.toml
-│   ├── requirements.lock.txt
-│   └── requirements-ml.lock.txt
-├── frontend/
-│   ├── src/
-│   │   ├── api/       # HTTP and WebSocket transport
-│   │   ├── components/# object inspector
-│   │   ├── rendering/ # PixiJS scene and camera geometry
-│   │   ├── prediction/# model selection, ghost controls, measured forecast errors
-│   │   ├── counterfactual/ # branch tree, intervention preview, comparative futures
-│   │   ├── research/  # dataset explorer, training and comparison dashboards
-│   │   ├── state/     # typed observation store
-│   │   ├── timeline/  # recorded state scrubbing and transport
-│   │   └── planning/  # terminal goal, candidate ranking and separate measurements
-│   └── pnpm-lock.yaml
-├── scripts/          # Windows launcher and benchmark
-├── docs/             # requirements, architecture, visual verification
-├── experiments/      # local exports, ignored by Git
-├── datasets/         # generated collections, ignored by Git
-├── STAGE_1_REPORT.md
-├── STAGE_2_REPORT.md
-├── STAGE_3_REPORT.md
-├── STAGE_4_REPORT.md
-├── STAGE_5_REPORT.md
-├── STAGE_6_REPORT.md
-├── STAGE_7_REPORT.md
-└── STAGE_8_REPORT.md
-```
-
-[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training and evaluation](docs/TRAINING.md) · [Prediction Lab](docs/PREDICTION.md) · [Counterfactual Lab](docs/COUNTERFACTUAL.md) · [Advanced models](docs/ADVANCED_MODELS.md) · [Research comparisons](docs/RESEARCH.md) · [Learned planning](docs/PLANNING.md) · [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md) · [Stage 3](STAGE_3_REPORT.md) · [Stage 4](STAGE_4_REPORT.md) · [Stage 5 report](STAGE_5_REPORT.md) · [Stage 6 report](STAGE_6_REPORT.md) · [Stage 7 report](STAGE_7_REPORT.md) · [Stage 8 report](STAGE_8_REPORT.md)
-
-Contributor rules: [AGENTS.md](AGENTS.md) · [Git and review workflow](docs/REPOSITORY_WORKFLOW.md). Substantial changes use separate branches and Pull Requests into `main`. GitHub Actions checks the backend on Linux / Windows and the frontend tests, lint, formatting and production build.
-
-## Physics engine
-
-Pymunk 7.2 wraps the established Chipmunk rigid-body engine and integrates directly with Python. A single-threaded Space, fixed `1/120 s` timestep, deterministic object insertion and local seeded RNG provide reproducible tests. Circles and rectangles cover spheres, blocks, ramps, walls and platforms. Ramp angles are rectangle rotations.
-
-Pymunk was chosen over Box2D for its compact Python API and straightforward local installation. Its [Space documentation](https://www.pymunk.org/en/latest/pymunk.html#pymunk.Space) describes the solver and contact cache behavior that motivated replay-based restoration. This is a controlled rigid-body sandbox; extreme velocities may tunnel through thin surfaces, and arbitrary overlapping initial conditions are not physically meaningful experiments.
-
-PixiJS provides GPU rendering, anti-aliased geometry, cached shapes and smooth camera motion. It fits the [scene-graph / Graphics API](https://pixijs.com/8.x/guides/components/scene-objects/graphics) needed for instrumentation and later model trajectories. It never runs a second physics engine.
-
-## World model
-
-MLP / GRU retain the Stage 3 shared encoder and pooled context. Stage 6 adds masked object attention → per-object temporal Transformer → learned motion residuals and contact logits. Verified checkpoints implement the `DynamicsModel` protocol and support autoregressive rollouts. Static geometry is context, not a target. Visual encoders remain a future extension.
-
-## Counterfactual reasoning
-
-Counterfactual Lab captures a paused observation and its source journal. Preview mass, velocity, direction, material or geometry changes; insert, duplicate or remove bodies; save alternatives in an immutable tree. Children inherit interventions at the same observed source tick. Predict each alternative with verified weights, then separately **Run reality** to measure the error. Overlay / split views share a sampled cursor and camera. Neither operation changes the live world. Neutral replay trails are **recorded observations**; violet ghosts are learned outputs; cyan future traces are separately executed Pymunk reality.
-
-Counterfactual conditioning preserves original observations, overrides the terminal state, projects removed identities out, and labels repeated anchor placeholders for added bodies as synthetic inputs. All three model families were trained on ordinary episodes; intervention results remain exploratory. Transformer dropout intervals are optional and uncalibrated. [Conditioning and branch contract](docs/COUNTERFACTUAL.md).
-
-## Prediction pipeline
-
-In the Lab: paused real observation history → verified trained weights → autoregressive rollout → violet ghosts / separate forecast cursor → measured errors against an independently replayed Pymunk reference. Both futures hold the anchor's conditions and leave live physics untouched. Inference runs in a bounded CPU subprocess; stale live anchors are rejected. Counterfactual Lab retains immutable source anchors even after live edits. Research / CLI retain separate held-out evaluation. MC dropout reports empirical 5–95% marginal position intervals and their observed coverage; it does not certify confidence. [Prediction measurement contract](docs/PREDICTION.md).
-
-## Screenshots
-
-### Main Lab
-
-![ORACLE Main Lab at 1440×900](docs/screenshots/main-lab-1440.jpg)
-
-[1920×1080 verification](docs/screenshots/main-lab-1920.jpg)
-
-### Research Mode
-
-![Stage 2 dataset explorer](docs/screenshots/dataset-explorer-1440.jpg)
-
-[1920×1080 dataset explorer](docs/screenshots/dataset-explorer-1920.jpg) · [Stage 1 roadmap archive](docs/screenshots/research-1920.jpg)
-
-### Counterfactual Branches
-
-![Stage 5 immutable branches and intervention comparison](docs/screenshots/stage5-branches-1920.jpg)
-
-[Intervention preview at 1440×900](docs/screenshots/stage5-preview-1440.jpg) · [Predicted / actual at 1440×900](docs/screenshots/stage5-predicted-actual-1440.jpg)
-
-### Matched Model Comparison
-
-![Stage 7 checkpoint comparison](docs/screenshots/stage7-comparison-1920.jpg)
-
-[1440×900 comparison](docs/screenshots/stage7-comparison-1440.jpg) · [OOD horizon detail](docs/screenshots/stage7-ood-1440.jpg) · [Checkpoint management](docs/screenshots/stage7-checkpoints-1920.jpg)
-
-### Learned Planning
-
-![Stage 8 learned action ranking and explicit reality](docs/screenshots/stage8-planning-1920.jpg)
-
-[1440×900 measurements](docs/screenshots/stage8-planning-1440.jpg) · [Goal editing hides previous measurements](docs/screenshots/stage8-goal-1440.jpg)
-
-### Predicted vs Actual
-
-![Stage 4 learned ghosts and measured errors](docs/screenshots/stage4-prediction-1440.jpg)
-
-[1920×1080 verification](docs/screenshots/stage4-prediction-1920.jpg) · [Real-history preparation](docs/screenshots/stage4-preparation-1440.jpg)
-
-### Training Dashboard
-
-![Stage 3 training dashboard](docs/screenshots/stage3-training-1440.jpg)
-
-[1920×1080 training panel](docs/screenshots/stage3-training-1920.jpg) · [OOD rollout evaluation](docs/screenshots/stage3-evaluation-1440.jpg)
-
-## Demo workflow
-
-1. Open the Lab and start physics with **Play** or **Space**.
-2. Pause after an interesting contact. Drag the timeline to any recorded tick.
-3. Select a body. Edit its material properties or use **Motion & transform** for position, rotation, velocity and angular velocity.
-4. Inspect the scene preview, then **Apply to world**. Editing truncates future observations at the selected tick.
-5. Add, duplicate, drag or remove objects while paused. Static ramps / walls can be moved and rotated too.
-6. Use focus, follow, pan, scroll zoom and camera reset.
-7. **Save state** creates a browser snapshot. Open the library to restore it, export JSON or import an experiment.
-8. Choose another scene and seed to start another reproducible experiment.
-9. Switch to **Research → Dataset engine**. Choose a collection seed, size and episode duration, then **Collect dataset**. An isolated Python worker collects real observations.
-10. Inspect train / validation / test / OOD episodes. Scrub their observed timeline, select a specimen, compare initial mass / speed distributions and inspect normalization provenance.
-11. Open **Research → World model**, choose MLP or GRU, a dataset, training seed, epoch count and observed history. **Train world model** launches real optimization in a separate worker.
-12. Inspect logged losses and the validation-selected checkpoint. Choose test / OOD groups and rollout horizons, compare with the constant-velocity reference, and export evaluation JSON.
-13. Return to **Lab → Prediction**, select a completed model and pause the world. **Record observations** collects the real history needed by its sampling clock.
-14. Choose the horizon and **Predict future**. Scrub the separate forecast, compare violet learned ghosts / cyan Pymunk actual, select a body and inspect measured errors. Expand **Forecast settings** to change model / horizon; export the actual report JSON. Edits, seeks and real playback clear stale predictions.
-15. Open **Counterfactual**, record any missing real history and **Capture source**. Choose a body, preview an intervention and **Save alternative**. Select a parent before creating a child; all changes use the original observed anchor.
-16. **Predict future** uses real model weights. **Run reality** separately executes the branch in Pymunk. Compare alternatives or predicted / actual using overlay / split and the shared cursor. Save plans locally or export the full JSON report. Imported plans are replay-validated and require fresh computed futures.
-17. Open **Research → Model comparison**, select 2–4 completed checkpoints from the same dataset and choose test/OOD groups and observed horizons. **Run matched batch** scores identical targets/anchors, records real CPU forward timing and preserves its report in the batch log. Switch groups/horizons and export JSON/CSV. Inspect a checkpoint to label, pin or reversibly archive it from comparison selection.
-18. Open **Planning**, pause the live world and record any missing real history. Choose a dynamic body, terminal position goal/tolerance, completed model, observed horizon and velocity grid step. **Search learned futures** ranks the unchanged baseline and eight offsets using learned rollouts only. **Run reality** separately measures the fixed winner; inspect both goal distances and target FDE, scrub the sampled future and export the report. Expanding **Goal & search settings** lets you change the goal; changed settings hide previous measurements until a matching search is available.
-
-## Installation
-
-Requirements: Python 3.12+, Node.js 22.12+ (verified with 24.19), pnpm (verified with 11.25). Commands below are PowerShell, from the project root. Python 3.12 was used for verification.
+Windows / PowerShell is the primary local environment. Use Python 3.12, Node.js 22.12+
+and pnpm 11.25.0 (Node 24 and Python 3.12 are used in CI). From the repository root:
 
 ```powershell
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r backend/requirements.lock.txt
 .\.venv\Scripts\python.exe -m pip install --no-deps -e ./backend
 .\.venv\Scripts\python.exe -m pip install -r backend/requirements-ml.lock.txt
-cd frontend
-pnpm install --frozen-lockfile
-cd ..
+pnpm --dir frontend install --frozen-lockfile
+.\.venv\Scripts\python.exe -m oracle.setup_demo
+./scripts/dev.ps1
 ```
 
-For dependency development, use `.\.venv\Scripts\python.exe -m pip install -e './backend[dev]'`. The frontend explicitly allows esbuild's registry package build step in `pnpm-workspace.yaml`.
+Open [ORACLE](http://127.0.0.1:5181). In **Lab → Prediction**, choose **oracle-demo**,
+five future observations, **Record observations**, then **Predict future**. Violet ghosts
+are learned output; cyan is independent Pymunk. In **Counterfactual**, capture the source,
+preview **Mass ×2**, save an alternative, predict it and separately **Run reality**.
+In **Planning**, select the same model, search nine actions and verify the winner.
 
-## Development
+Setup collects 14 real episodes and trains a three-epoch GRU with deliberately limited
+accuracy. Compatible completed output is verified/reused without writing; partial or
+incompatible output is preserved and rejected. Datasets and weights stay outside Git.
+`./scripts/dev.ps1 -Stop` stops only its tracked processes. For cross-platform or
+two-terminal startup, see [Demo and E2E](docs/DEMO_AND_E2E.md). Dependency installation
+is the largest first-run cost; the small demo is separate from full research training.
 
-Run in two terminals from the root:
+## Measured evidence
+
+The release pass executed **432 source/intervention combinations**, three reference
+checkpoints and two horizons: 390 combinations were eligible, 42 explicitly unsupported.
+A separate study ran **five training seeds per family**, fifteen runs total.
+
+| Family | Test FDE50 mean ± sample std (m) | 95% interval for the seed mean (m) | OOD macro FDE50 mean ± std (m) |
+| --- | ---: | --- | ---: |
+| MLP | 3.1755 ± 0.3789 | [2.7051, 3.6459] | 3.5834 ± 0.8091 |
+| GRU | 3.0617 ± 0.1747 | [2.8449, 3.2786] | 3.1496 ± 0.1280 |
+| Transformer | 3.2409 ± 0.2612 | [2.9166, 3.5652] | 3.2901 ± 0.1671 |
+
+One small procedural dataset and one fixed recipe: the intervals overlap and do not
+prove universal architecture superiority. Student t mean intervals describe variation
+across training seeds, not trajectory confidence. Existing Transformer MC-dropout h50
+coverage is **2.27% x, 11.36% y and 0% joint**: severe undercoverage is retained.
+
+[Release report](RELEASE_1_0_REPORT.md) · [Exact provenance](docs/results/release-provenance.json)
+· [Intervention statistics](docs/results/release-counterfactual.csv) · [Seed statistics](docs/results/release-seeds.csv)
+
+![Actual multi-seed family comparison at 1440×900](docs/screenshots/release-families-1440.jpg)
+
+[All release browser checks and screenshots](docs/RELEASE_BROWSER_QA.md).
+
+## Full research reproduction
+
+[Full reproduction](docs/REPRODUCTION.md) covers collection, training/evaluation,
+matched checkpoint batches, physics experiments and all interactive flows. After
+generating `datasets/demo` and compatible checkpoints:
 
 ```powershell
-# Terminal 1
-.\.venv\Scripts\python.exe -m uvicorn oracle.api:app --host 127.0.0.1 --port 8011
+.\.venv\Scripts\python.exe -m oracle.counterfactual_benchmark --checkpoint checkpoints/gru/best.pt --scenes 24 --seed 42 --horizons 10 50 --output experiments/counterfactual-24
+.\.venv\Scripts\python.exe -m oracle.multiseed --dataset datasets/demo --seeds 1 2 3 4 5 --output experiments/multiseed/five-seeds
 ```
 
-```powershell
-# Terminal 2
-cd frontend
-pnpm run dev
-```
+Output directories must be new. Repeat `--checkpoint` for up to three matched models.
+The benchmark supports baseline plus 17 mass, velocity, material, geometry and structural
+interventions, with explicit CPU/work/deadline bounds and no heavy launch API.
+**Research → Checkpoint comparison** evaluates fixed checkpoints; **Family comparison**
+reads completed repeated-seed reports. [Methods and limits](docs/RELEASE_EXPERIMENTS.md).
 
-Open [ORACLE Lab](http://127.0.0.1:5181). The backend exposes [interactive API docs](http://127.0.0.1:8011/docs). Vite proxies both HTTP and WebSocket connections to port 8011. These ports avoid typical local services on 8000 / 5173. If you change them, update the Vite proxy and backend origin list together.
+## Architecture
 
-Optional Windows launcher: `./scripts/dev.ps1` starts hidden processes and saves logs in `.run/`. `./scripts/dev.ps1 -Stop` stops the tracked process trees after checking their IDs and creation timestamps. The launcher checks occupied ports and refuses to replace unrelated services. The two-terminal workflow is also available when you prefer direct control of server lifetimes.
+Python owns physics, observations, training, inference and experiment state. React/Pixi
+render returned observations/futures; the browser has no physics engine. Pymunk steps
+at 120 Hz; model observations use a separate 30 Hz clock. Normalization is train-only,
+selection validation-only, test/OOD use fixed targets and anchors.
 
-Verification:
+`backend/oracle/` separates datasets, models, training, prediction, counterfactual,
+research, planning and bounded CLI benchmarking. Frontend live state, recorded playback,
+branch state and rendering stay distinct; Research/charts are lazy. Optional `ORACLE_DATA_ROOT`
+isolates generated artifacts for E2E without changing source or model contracts.
+
+[Architecture](docs/ARCHITECTURE.md) · [Datasets](docs/DATASETS.md) · [Training](docs/TRAINING.md)
+· [Prediction](docs/PREDICTION.md) · [Counterfactual](docs/COUNTERFACTUAL.md)
+· [Advanced models](docs/ADVANCED_MODELS.md) · [Research](docs/RESEARCH.md) · [Planning](docs/PLANNING.md)
+
+## Validation and Git workflow
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest backend/tests
 .\.venv\Scripts\python.exe -m ruff check backend scripts/benchmark.py
 .\.venv\Scripts\python.exe -m ruff format --check backend scripts/benchmark.py
-cd frontend
-pnpm test
-pnpm run lint
-pnpm exec prettier --check src
-pnpm run build
-pnpm run preview
+.\.venv\Scripts\python.exe -m pip check
+pnpm --dir frontend install --frozen-lockfile
+pnpm --dir frontend test
+pnpm --dir frontend run lint
+pnpm --dir frontend exec prettier --check src e2e playwright.config.ts
+pnpm --dir frontend exec tsc --project tsconfig.e2e.json
+pnpm --dir frontend run build
+.\.venv\Scripts\python.exe -m oracle.setup_demo --root .run/e2e --profile smoke
+pnpm --dir frontend exec playwright install chromium
+pnpm --dir frontend run test:e2e
 ```
 
-The production preview runs at [127.0.0.1:4181](http://127.0.0.1:4181) and still requires the Python backend. Font files are bundled, so typography does not depend on a third-party font service.
+CI: Backend Linux, Backend Windows, Frontend and separate Browser E2E. Five browser
+flows use real Pymunk/API/trained weights with an isolated tiny fixture rather than full
+research training. [E2E details](docs/DEMO_AND_E2E.md). GitHub is the shared source of truth:
+descriptive branches, logical commits, validation and a reviewed PR into `main`.
+[AGENTS.md](AGENTS.md) · [Repository workflow](docs/REPOSITORY_WORKFLOW.md).
 
-Keyboard shortcuts: **Space** play / pause, **.** one tick, **R** reset camera, **Delete** remove selection. Drag objects while paused; drag empty space or Alt-drag to pan. Scroll zooms around the pointer. Form fields and dialogs retain normal keyboard behavior.
+## Limits
 
-On Windows, start / stop the helper from a normal terminal with permission to manage its own process trees. It now probes loopback ports without WMI, compares numeric process creation timestamps, records ownership before startup validation and reports early failures instead of silently claiming success.
+A local portfolio/research project with bounded recordings, libraries and workers:
+export important experiments. Models drift over long horizons and can fail under
+structural changes; added-body history is explicitly synthetic. Dropout is uncalibrated.
+Planning changes velocity once and searches nine actions, with no global optimality.
+CUDA, mobile, hosted multi-user operation and cross-platform bitwise determinism are
+unverified. The release report retains measured failures and remaining limitations.
 
-## Dataset generation
-
-Collect the default 64-episode dataset: 24 train, 8 validation, 8 test and 4 episodes for each of six OOD suites. Each episode has 480 solver ticks (4 seconds), sampled every 4 ticks (30 Hz), producing 120 adjacent transition pairs.
-
-```powershell
-.\.venv\Scripts\python.exe -m oracle.generate_dataset --seed 42 --output datasets/demo
-.\.venv\Scripts\python.exe -m oracle.inspect_dataset datasets/demo
-.\.venv\Scripts\python.exe -m oracle.inspect_dataset datasets/demo --pair train --normalized
-```
-
-Count and clock flags: `--train`, `--validation`, `--test`, `--ood-per-suite`, `--steps`, `--sample-stride`. `--config config.json` accepts a strict DatasetConfig; `--output path` requires an empty directory. Completed datasets are never overwritten. No browser is required.
-
-The UI exposes the same generator and reuses completed identical configurations. Failed partial collections are preserved in `datasets/.partial/` before a retry. Each collection includes compressed JSON episodes, a versioned manifest, checksums, exact initial conditions and train-only normalization. The catalog inspects immediate subdirectories of `datasets/`.
-
-Splits are assigned before simulation and remain disjoint at episode / seed level. OOD suites cover unseen mass, velocity, orientation, object count, obstacle count and a reserved mass–speed combination. OOD refers to **initial conditions**; later velocities can exceed those ranges under gravity. [Dataset format, boundaries and feature encoding](docs/DATASETS.md).
-
-## Training
-
-```powershell
-.\.venv\Scripts\python.exe -m oracle.train --dataset datasets/demo --output checkpoints/mlp --model mlp --epochs 35
-.\.venv\Scripts\python.exe -m oracle.train --dataset datasets/demo --output checkpoints/gru --model gru --epochs 35
-```
-
-Defaults: CPU, two threads, history four observed frames, 64-dimensional embeddings / hidden state, AdamW lr 0.001, batch 64. `best.pt` is selected by validation alone; `last.pt` contains optimizer / RNG state for exact resume in the verified CPU runtime. Every checkpoint binds dataset hashes, architecture, normalization, gravity and observation clock. [Configuration, resume, artifact layout and bounds](docs/TRAINING.md).
-
-## Evaluation
-
-```powershell
-.\.venv\Scripts\python.exe -m oracle.evaluate checkpoints/gru/best.pt --dataset datasets/demo --output experiments/gru-evaluation.json
-```
-
-Report one-step position / velocity MSE, periodic rotation MAE, contact classification and autoregressive ADE / FDE at 1 / 5 / 10 / 20 / 50 observed steps. Validation, test and six OOD suites stay separate. The same samples also score a named constant-velocity analytical reference. No confidence estimates are invented. [Measured results and limitations](STAGE_3_REPORT.md).
-
-For matched multi-checkpoint evaluation, use **Research → Model comparison** or:
-
-```powershell
-.\.venv\Scripts\python.exe -m oracle.research_batch --dataset datasets/demo --checkpoint checkpoints/mlp/best.pt --checkpoint checkpoints/gru/best.pt --output experiments/research/comparison-demo
-```
-
-The common observation start uses the longest selected history. Reports retain exact anchors, supported/omitted horizons, hashes, measured CPU timing and separate test/OOD results. [Research protocol, worker bounds and exports](docs/RESEARCH.md) · [Actual Stage 7 results](STAGE_7_REPORT.md).
-
-## Experiments
-
-The shared headless simulation path works without a browser:
-
-```powershell
-.\.venv\Scripts\python.exe -m oracle.experiment --seed 42 --scene incline --steps 600 --output experiments/example.json
-.\.venv\Scripts\python.exe scripts/benchmark.py
-```
-
-An experiment contains schema and engine versions, a null model version, timestamp, seed, complete environment and initial object definitions, ordered edit events, playhead and recorded duration. Import reconstructs the solver history and restores a paused playhead. Equal runs are tested on this platform and pinned Pymunk version; bitwise identity across versions / operating systems is not guaranteed.
-
-## Metrics
-
-The Lab displays observed physical state and **translational kinetic energy**, excluding rotational energy. Prediction reports dynamic-object ADE / FDE, position / velocity MSE, periodic rotation error and contact-onset counts against a separate physical future. Research retains held-out test / OOD evaluation and matched comparisons. Undefined classification ratios remain null. See [forecast metrics](docs/PREDICTION.md#metrics), [research metrics](docs/TRAINING.md#evaluation-definitions) and [comparison protocol](docs/RESEARCH.md). Optional Transformer MC dropout intervals have measured coverage and width; they remain uncalibrated.
-
-## Roadmap
-
-| Stage | Scope | Status |
-| --- | --- | --- |
-| 1 | Physics foundation and polished visual sandbox | Implemented and verified |
-| 2 | Dataset engine, splits, normalization, data explorer | Implemented and verified |
-| 3 | Object encoder, MLP / GRU, training, validation and rollout evaluation | Implemented and verified |
-| 4 | Learned rollout, ghost futures and prediction error | Implemented and verified |
-| 5 | Interventions, branch trees and comparative futures | Implemented and verified |
-| 6 | Transformer, object attention and uncertainty | Implemented and verified |
-| 7 | Model comparison, OOD suites and batch reports | Implemented and verified |
-| 8 | Planning through learned model rollouts | Implemented and verified |
-
-## Limitations
-
-Local prototype: no accounts, remote hosting or persistent session database. Collection, training and inference use separate processes. Browser world snapshots are limited to eight; counterfactual plans to two locally / four per live session, with 16 branches and eight intervention levels. Export important experiments. Recordings stop at 120 simulated seconds, scenes support 64 objects and experiments 512 edits. Seeks replay from the start. Predictions require compatible real history after edits, support up to 120 observed future steps and time out after 45 seconds. Each request starts a fresh CPU worker; startup latency remains. The physical reference ignores edits recorded after its anchor. Use ordinary speeds and avoid heavy initial overlaps. Small learned baselines have substantial OOD / long-horizon drift; Lab scenes are not certified in-distribution. Added-body history in counterfactual model inputs is explicitly synthetic. CUDA training is guarded but unverified. Research compares 2–4 checkpoints, with one worker per output root and a 15-minute API deadline; its warmed CPU timing excludes loading and transport. Planning supports one velocity intervention in a nine-action grid, ≤32 objects and ≤32768 candidate object-steps. It has no global optimality, intervention-specific training or calibrated confidence. Planning reports are session-scoped and require export for durable CLI reproduction. [Protocol and limits](docs/PLANNING.md). Checkpoints/reports remain local. Multi-seed significance, calibration, intervention-specific training, UI training cancellation / resume, sequential planning and 3D are future work. Stage reports record actual verification coverage.
-
-## Research questions
-
-1. How accurately can a learned model predict short-horizon dynamics?
-2. How quickly does autoregressive rollout error accumulate?
-3. Does it generalize to unseen masses and velocities?
-4. Does it generalize to more objects and new obstacle arrangements?
-5. Which architecture best captures interacting-object dynamics?
-6. Does estimated uncertainty correlate with actual prediction error?
-7. Can learned rollouts support planning with real-world verification?
+Historical evidence: [Stage 1](STAGE_1_REPORT.md) · [Stage 2](STAGE_2_REPORT.md)
+· [Stage 3](STAGE_3_REPORT.md) · [Stage 4](STAGE_4_REPORT.md) · [Stage 5](STAGE_5_REPORT.md)
+· [Stage 6](STAGE_6_REPORT.md) · [Stage 7](STAGE_7_REPORT.md) · [Stage 8](STAGE_8_REPORT.md).

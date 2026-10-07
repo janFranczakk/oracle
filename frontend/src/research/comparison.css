@@ -5,6 +5,15 @@
   max-width: 1760px;
   margin: auto;
 }
+.family-provenance {
+  margin: var(--s-5);
+  color: var(--dim);
+  font: 10px var(--mono);
+  line-height: 1.7;
+}
+.family-provenance code {
+  overflow-wrap: anywhere;
+}
 .comparison-heading {
   display: flex;
   justify-content: space-between;

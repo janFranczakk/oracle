@@ -15,9 +15,8 @@ import type { Body, Command, Vec2 } from '../types';
 import { useLab } from '../state/lab';
 import { hitTest, scaleFor, screenToWorld, worldToScreen } from './coordinates';
 import type { Camera } from './coordinates';
-import { frameAt, ghostAlpha, ghostSteps, pairedBodies, trajectory } from '../prediction/forecast';
-import { bodyGraphic, ghostGraphic, CURVE_SCALE } from './graphics';
-import { intervalGraphic } from './uncertainty';
+import { bodyGraphic, CURVE_SCALE } from './graphics';
+import { ForecastLayer } from './ForecastLayer';
 
 type Props = { command: (value: Command) => Promise<void> };
 const HOME: Camera = { x: 12, y: 6.6, zoom: 1 };
@@ -52,10 +51,7 @@ export function WorldViewport({ command }: Props) {
     const selection = new Graphics(),
       preview = new Graphics(),
       impacts = new Graphics();
-    const forecastPaths = new Graphics(),
-      gaps = new Graphics(),
-      forecastBodies = new Container();
-    let lastForecast = '';
+    const forecast = new ForecastLayer();
     impacts.scale.set(1 / CURVE_SCALE);
     const objects = new Map<string, { g: Graphics; label: Text; signature: string }>();
     const target = cameraRef.current;
@@ -160,9 +156,9 @@ export function WorldViewport({ command }: Props) {
         root.addChild(
           gridLines,
           trajectories,
-          forecastPaths,
-          forecastBodies,
-          gaps,
+          forecast.paths,
+          forecast.bodies,
+          forecast.gaps,
           bodies,
           vectorsLayer,
           preview,
@@ -195,73 +191,7 @@ export function WorldViewport({ command }: Props) {
           const scale = scaleFor(width, height, camera.zoom);
           root.scale.set(scale, -scale);
           root.position.set(width / 2 - camera.x * scale, height / 2 + camera.y * scale);
-          const prediction = s.prediction;
-          const forecastKey = `${prediction?.created_at}-${s.forecastStep}-${s.selectedId}-${s.ghosts}-${s.reference}-${s.errorVectors}`;
-          if (forecastKey !== lastForecast) {
-            lastForecast = forecastKey;
-            forecastPaths.clear();
-            gaps.clear();
-            for (const child of forecastBodies.removeChildren()) child.destroy();
-            if (prediction) {
-              if (s.ghosts && prediction.uncertainty && s.forecastStep > 0)
-                forecastBodies.addChild(
-                  intervalGraphic(
-                    prediction.uncertainty,
-                    prediction.frames[s.forecastStep - 1].tick,
-                    s.selectedId,
-                  ),
-                );
-              const dynamic = prediction.anchor_frame.objects.filter((body) => !body.static);
-              for (const body of dynamic) {
-                const focus = !s.selectedId || body.id === s.selectedId;
-                for (const actual of [false, true]) {
-                  if (actual ? !s.reference : !s.ghosts) continue;
-                  const points = trajectory(prediction, body.id, actual);
-                  forecastPaths.moveTo(points[0].x, points[0].y);
-                  for (const point of points.slice(1)) forecastPaths.lineTo(point.x, point.y);
-                  forecastPaths.stroke({
-                    color: actual ? 0x93e3eb : 0xa79ad7,
-                    width: actual ? 0.025 : 0.04,
-                    alpha: focus ? (actual ? 0.4 : 0.65) : 0.16,
-                  });
-                }
-              }
-              if (s.ghosts)
-                for (const step of ghostSteps(prediction.horizon)) {
-                  for (const body of frameAt(prediction, step).objects.filter(
-                    (body) => !body.static,
-                  ))
-                    forecastBodies.addChild(
-                      ghostGraphic(
-                        body,
-                        0xa79ad7,
-                        ghostAlpha(step, prediction.horizon) *
-                          (!s.selectedId || s.selectedId === body.id ? 1 : 0.4),
-                      ),
-                    );
-                }
-              for (const pair of pairedBodies(prediction, s.forecastStep)) {
-                const focus = !s.selectedId || pair.actual.id === s.selectedId;
-                if (s.ghosts)
-                  forecastBodies.addChild(
-                    ghostGraphic(pair.predicted, 0xc3b6f1, focus ? 0.85 : 0.28, true),
-                  );
-                if (s.reference)
-                  forecastBodies.addChild(
-                    ghostGraphic(pair.actual, 0x93e3eb, focus ? 0.75 : 0.25, true),
-                  );
-                if (s.errorVectors && s.forecastStep > 0) {
-                  const a = pair.actual.position,
-                    p = pair.predicted.position;
-                  gaps
-                    .moveTo(a.x, a.y)
-                    .lineTo(p.x, p.y)
-                    .stroke({ color: 0xdfb978, width: 0.025, alpha: focus ? 0.8 : 0.15 });
-                  gaps.circle(p.x, p.y, 0.065).fill({ color: 0xdfb978, alpha: focus ? 0.8 : 0.15 });
-                }
-              }
-            }
-          }
+          forecast.update(s);
           const gridKey = `${s.grid}-${width}-${height}-${Math.round(camera.zoom * 100)}`;
           if (gridKey !== lastGrid) {
             lastGrid = gridKey;

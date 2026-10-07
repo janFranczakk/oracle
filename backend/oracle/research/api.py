@@ -14,6 +14,8 @@ from fastapi import APIRouter, HTTPException
 from oracle.datasets.api import PROJECT_ROOT, DatasetService
 from oracle.datasets.api import service as datasets
 from oracle.datasets.storage import read_json, read_manifest, write_json
+from oracle.paths import ARTIFACT_ROOT
+from oracle.research.families import FamilyStudies
 from oracle.research.registry import CheckpointRegistry
 from oracle.research.schema import BatchRequest, CheckpointNotes
 
@@ -216,8 +218,24 @@ class ResearchService:
 
 
 service = ResearchService(
-    PROJECT_ROOT / "experiments" / "research", PROJECT_ROOT / "checkpoints", datasets
+    ARTIFACT_ROOT / "experiments" / "research", ARTIFACT_ROOT / "checkpoints", datasets
 )
+family_studies = FamilyStudies(ARTIFACT_ROOT / "experiments" / "multiseed")
+
+
+@router.get("/families")
+def families():
+    return {"studies": family_studies.catalog()}
+
+
+@router.get("/families/{identity}")
+def family_detail(identity: str):
+    try:
+        return family_studies.detail(identity)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise HTTPException(
+            404, "This completed seed study is unavailable or incompatible."
+        ) from exc
 
 
 @router.get("/checkpoints")

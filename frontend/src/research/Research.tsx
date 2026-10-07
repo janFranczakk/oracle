@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { DatasetExplorer } from './DatasetExplorer';
 import { TrainingDashboard } from './TrainingDashboard';
 import { ComparisonDashboard } from './ComparisonDashboard';
+import { FamilyDashboard } from './FamilyDashboard';
 import './datasets.css';
 const stages = [
   ['01', 'Physics foundation', 'Deterministic simulation, state editing and replay.', Orbit],
@@ -48,7 +49,14 @@ export function Research() {
           onClick={() => setView('comparison')}
         >
           <FlaskConical size={14} />
-          Model comparison<span className="tag">LIVE</span>
+          Checkpoint comparison<span className="tag">LIVE</span>
+        </button>
+        <button
+          className={view === 'families' ? 'selected' : ''}
+          onClick={() => setView('families')}
+        >
+          <FlaskConical size={14} />
+          Family comparison<span className="tag">MULTI-SEED</span>
         </button>
         <button className={view === 'roadmap' ? 'selected' : ''} onClick={() => setView('roadmap')}>
           <Waypoints size={14} />
@@ -61,6 +69,8 @@ export function Research() {
         <DatasetExplorer />
       ) : view === 'comparison' ? (
         <ComparisonDashboard />
+      ) : view === 'families' ? (
+        <FamilyDashboard />
       ) : (
         <>
           <div className="research-intro">
