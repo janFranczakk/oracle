@@ -159,6 +159,30 @@ The report binds a normalized source plan, request and model description with SH
 
 Prediction, Counterfactual and Planning share one inference supervisor slot and its 45-second deadline. API startup and reality-only workers do not import Torch. `frontend/src/planning/` owns goal controls, returned ranking, sampled cursor, separate measurements and JSON export. `BranchViewport` adds optional goal/alternative trajectory layers using returned positions. Existing callers retain their rendering behavior. The UI never performs physics, inference or objective scoring. [Planning protocol, API, reproduction and limits](PLANNING.md).
 
+## Final validation and release
+
+`benchmarking/scenarios.py` defines seventeen controlled interventions plus baseline,
+conservative geometric eligibility and explicit skips. `counterfactual.py` orchestrates
+real source histories, existing conditioning, learned inference and subsequent independent
+Pymunk reality with case/source/checkpoint/data hashes. `statistics.py` aggregates defined
+values and optional Student t mean CIs; `multiseed.py` wraps existing training unchanged,
+requiring common dataset/configuration/target schedules. `artifacts.py` protects new
+destinations and atomically publishes checksum-bound reports/status. Both bounded CLI
+studies remain outside API launch paths.
+
+`research/families.py` exposes completed, checksum-verified report reads with path/file
+and total catalog-byte limits. `setup_demo.py` prepares small real Pymunk/GRU artifacts or
+verifies/reuses compatible completion. `paths.py` separates source `PROJECT_ROOT` from
+optional `ORACLE_DATA_ROOT` artifact storage for real isolated E2E. No model/world schema
+change is needed.
+
+Frontend responsibilities are extracted into dialog UI/focus, counterfactual tasks/library,
+branch/provenance views, recorded observer, distributions, training evaluation and cached
+Pixi forecast drawing. Coordinators retain shared state ownership and rendering order.
+`FamilyDashboard` separates seed evidence from fixed checkpoints. Five browser flows
+use a protected tiny fixture and owned ports. [Methods](RELEASE_EXPERIMENTS.md),
+[demo/E2E](DEMO_AND_E2E.md), [report](../RELEASE_1_0_REPORT.md).
+
 ## Design system
 
 `frontend/src/styles.css` owns palette, spacing, radii, shadows, fonts and timing tokens. Graphite surfaces and cool cyan identify the laboratory; neutral traces represent recorded reality, violet identifies learned futures. Manrope is the interface typeface; IBM Plex Mono is used for measurements. Both fonts are bundled locally. The live Lab viewport occupies about 76% of the desktop workspace width at 1440 and about 80% at 1920. Counterfactual Lab also allocates space to a branch tree and an execution inspector. Inspectors scroll within their boundary rather than over the scene.

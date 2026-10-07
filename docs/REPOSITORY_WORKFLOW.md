@@ -25,7 +25,7 @@ If local work or divergence exists, preserve it and resolve its ownership first.
 
 ## Validate and deliver
 
-The CI workflow runs pytest, dependency consistency and Ruff on Linux and Windows. Frontend CI uses Node 24 and pnpm 11.25.0 with the committed lockfile, then runs Vitest, ESLint, Prettier and the strict TypeScript / Vite build. Actions are pinned to verified release commits and use read-only repository permissions. CI performs validation only; it does not deploy the app or publish datasets.
+The CI workflow runs pytest, dependency consistency and Ruff on Linux and Windows. Frontend CI uses Node 24 and pnpm 11.25.0 with the committed lockfile, then runs Vitest, ESLint, Prettier and the strict TypeScript / Vite build. A separate Browser E2E job trains tiny real GRU weights and runs five Chromium flows against isolated servers. Full seed/intervention studies stay outside CI. Actions are pinned to verified release commits and use read-only repository permissions. CI validates; it does not deploy or publish datasets.
 
 Use the matching README commands locally. For visual changes, inspect the actual browser flow and affected desktop sizes; include screenshots. Update the relevant documentation and stage report with observed results and limitations.
 
@@ -45,6 +45,6 @@ Open a Pull Request into `main` using `.github/pull_request_template.md`. Report
 
 ## Repository settings
 
-The intended default branch is `main`. Require passing `Backend (ubuntu-latest)`, `Backend (windows-latest)` and `Frontend` checks when branch protection / rulesets are supported by the repository's account plan. Enforced settings must be confirmed in GitHub; documenting a policy does not enable protection. Keep the repository private unless its owner requests publication.
+The intended default branch is `main`. Require passing `Backend (ubuntu-latest)`, `Backend (windows-latest)`, `Frontend` and `Browser E2E` checks when branch protection / rulesets are supported by the repository's account plan. Confirm enforced settings in GitHub; documenting a policy does not enable protection. Keep the repository private unless its owner requests publication.
 
 Commit identity is configured locally for this repository from the authenticated owner or explicitly supplied author details. A GitHub-provided noreply address can preserve email privacy. No global Git identity or account settings need to change.

@@ -1,0 +1,413 @@
+{
+  "format": "oracle-release-evidence-v1",
+  "benchmark": {
+    "report_sha256": "801c0e62d41d6fa08eea79864b85e6967dd83bcf6383050d57b5f5ef20fb5f5e",
+    "config": {
+      "anchor_tick": 60,
+      "deadline_seconds": 1800,
+      "horizons": [
+        10,
+        50
+      ],
+      "interventions": [
+        "baseline",
+        "mass_0.75",
+        "mass_1.25",
+        "mass_2",
+        "velocity_0.75",
+        "velocity_1.25",
+        "velocity_1.5",
+        "velocity_direction",
+        "friction_down",
+        "friction_up",
+        "restitution_down",
+        "restitution_up",
+        "static_translate",
+        "ramp_rotate",
+        "static_add",
+        "static_remove",
+        "dynamic_duplicate",
+        "dynamic_remove"
+      ],
+      "scenes": 24,
+      "seed": 42
+    },
+    "provenance": {
+      "anchor_tick": 60,
+      "body_step_cap": 100000000,
+      "cpu_threads": 2,
+      "estimated_body_steps_upper_bound": 21565440,
+      "models": [
+        {
+          "architecture": {
+            "dropout": 0.1,
+            "embedding": 64,
+            "family": "mlp",
+            "heads": 4,
+            "hidden": 64,
+            "history": 4,
+            "layers": 2
+          },
+          "dataset_id": "ds-2cda3301ce8c3c5c",
+          "dataset_sha256": "900bd5da5ed8a0b97b541f1a42669ffe3f4edbac86ee2f3bfe80e9d77cd5132e",
+          "epoch": 22,
+          "gravity": [
+            0.0,
+            -9.81
+          ],
+          "id": "stage3-mlp",
+          "normalization_sha256": "05dd444ab5b6f63715253de5e40c6e714bc08cd111f9891d6544dd2e1ec693fb",
+          "sample_dt": 0.03333333333333333,
+          "sample_stride": 4,
+          "sha256": "f0a01d528ba51455896ee221595c39087d3b7b2e411deed73a61ee815ef123d4",
+          "training_seed": 7
+        },
+        {
+          "architecture": {
+            "dropout": 0.1,
+            "embedding": 64,
+            "family": "gru",
+            "heads": 4,
+            "hidden": 64,
+            "history": 4,
+            "layers": 2
+          },
+          "dataset_id": "ds-2cda3301ce8c3c5c",
+          "dataset_sha256": "900bd5da5ed8a0b97b541f1a42669ffe3f4edbac86ee2f3bfe80e9d77cd5132e",
+          "epoch": 28,
+          "gravity": [
+            0.0,
+            -9.81
+          ],
+          "id": "stage3-gru",
+          "normalization_sha256": "05dd444ab5b6f63715253de5e40c6e714bc08cd111f9891d6544dd2e1ec693fb",
+          "sample_dt": 0.03333333333333333,
+          "sample_stride": 4,
+          "sha256": "af4edee75ab667fc7b920347bfc7f09ca0c3044d95a5cebea792e66870d67d2a",
+          "training_seed": 7
+        },
+        {
+          "architecture": {
+            "dropout": 0.1,
+            "embedding": 64,
+            "family": "transformer",
+            "heads": 4,
+            "hidden": 64,
+            "history": 4,
+            "layers": 2
+          },
+          "dataset_id": "ds-2cda3301ce8c3c5c",
+          "dataset_sha256": "900bd5da5ed8a0b97b541f1a42669ffe3f4edbac86ee2f3bfe80e9d77cd5132e",
+          "epoch": 12,
+          "gravity": [
+            0.0,
+            -9.81
+          ],
+          "id": "stage6-transformer",
+          "normalization_sha256": "05dd444ab5b6f63715253de5e40c6e714bc08cd111f9891d6544dd2e1ec693fb",
+          "sample_dt": 0.03333333333333333,
+          "sample_stride": 4,
+          "sha256": "cf168921303e3a9b95345f1ae1391aaf3812ceefc296ca335330bdcb8b804fcd",
+          "training_seed": 7
+        }
+      ],
+      "runtime": {
+        "device": "cpu",
+        "platform": "Windows",
+        "python": "3.12.14",
+        "threads": 2,
+        "torch": "2.14.1+cpu"
+      },
+      "sampling_ranges": {
+        "angle_degrees": [
+          0.0,
+          45.0
+        ],
+        "angular_velocity": [
+          -1.0,
+          1.0
+        ],
+        "box_dimension": [
+          0.6,
+          1.2
+        ],
+        "friction": [
+          0.1,
+          0.8
+        ],
+        "held_out_corner": false,
+        "mass": [
+          1.0,
+          5.0
+        ],
+        "object_count": [
+          3,
+          8
+        ],
+        "obstacle_count": [
+          0,
+          2
+        ],
+        "radius": [
+          0.3,
+          0.65
+        ],
+        "restitution": [
+          0.2,
+          0.95
+        ],
+        "speed": [
+          0.0,
+          10.0
+        ]
+      },
+      "world_seeds": [
+        2812939239,
+        3578722927,
+        1972182458,
+        2243773389,
+        1310512354,
+        3104567114,
+        2749287274,
+        3779140087,
+        201106150,
+        681717651,
+        1395277901,
+        1634394159,
+        1732541328,
+        259035865,
+        2931678781,
+        2639670484,
+        3877472786,
+        614514334,
+        2328862103,
+        376478069,
+        1969719809,
+        3726077285,
+        322819981,
+        3616580531
+      ]
+    },
+    "elapsed_seconds": 121.43148839997593
+  },
+  "seed_study": {
+    "report_sha256": "04a1cec6f240057181387675799327674036e0ab7f879091c59df4a3430044db",
+    "config": {
+      "deadline_seconds": 3600,
+      "families": [
+        "mlp",
+        "gru",
+        "transformer"
+      ],
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "training": {
+        "batch_size": 64,
+        "contact_weight": 0.1,
+        "device": "cpu",
+        "epochs": 35,
+        "horizons": [
+          1,
+          5,
+          10,
+          20,
+          50
+        ],
+        "learning_rate": 0.001,
+        "model": {
+          "dropout": 0.1,
+          "embedding": 64,
+          "family": "mlp",
+          "heads": 4,
+          "hidden": 64,
+          "history": 4,
+          "layers": 2
+        },
+        "seed": 7,
+        "threads": 2
+      }
+    },
+    "provenance": {
+      "confidence_method": "Two-sided Student t 95% interval for the mean: mean \u00b1 t(0.975,n-1)*s/sqrt(n); sample s uses n-1. Assumes independent seed repeats and approximately normal metric distribution, conditional on fixed dataset/configuration. Small n gives weak evidence. Undefined for n<2; not a prediction interval or MC-dropout calibration.",
+      "dataset": {
+        "content_sha256": "900bd5da5ed8a0b97b541f1a42669ffe3f4edbac86ee2f3bfe80e9d77cd5132e",
+        "gravity": [
+          0.0,
+          -9.81
+        ],
+        "id": "ds-2cda3301ce8c3c5c",
+        "normalization_sha256": "05dd444ab5b6f63715253de5e40c6e714bc08cd111f9891d6544dd2e1ec693fb",
+        "sample_dt": 0.03333333333333333,
+        "sample_stride": 4
+      },
+      "estimated_training_windows": 1474200,
+      "runtime": {
+        "device": "cpu",
+        "platform": "Windows",
+        "python": "3.12.14",
+        "threads": 2,
+        "torch": "2.14.1+cpu"
+      },
+      "selection": "best validation objective only; test/OOD evaluated after selection",
+      "std_method": "sample standard deviation, ddof=1",
+      "training_window_cap": 10000000
+    },
+    "schedule_sha256": {
+      "ood/held_out_combination": "a62b0a43a2a75793f90dbb7e7ac1c51a1e3a8932747684d024e656545e4728bf",
+      "ood/unseen_angle": "c942dd3c05b86deaa305eb2973ba7d62b612e97c1b9d1a63c2a13226aa2cc216",
+      "ood/unseen_mass": "0174d31b2822030cda8b5caab3a816d11704b0df205f1d4a951dc4b7b59d76d6",
+      "ood/unseen_object_count": "885409f66775fc7d18b8eb09916e8f12dd9f2772ff81d154190161d6405e355c",
+      "ood/unseen_obstacles": "ee1634334ce8b27f3161d909914ceff1575ffb9ed03bcd04801e7a1a89a14789",
+      "ood/unseen_velocity": "280f7454c737d5ebe43566e33cb40242a712176bdf258f8efe92901088872d9a",
+      "test": "74ca23000282a32f3b9fa323864513ee38664d72bdc1b2144ee5036f86b3daa1",
+      "validation": "c8928f7ccea8714e001a62fd8eb6b5a007dba54b8324411cb170e973c8893133"
+    },
+    "elapsed_seconds": 722.398270500009,
+    "runs": [
+      {
+        "id": "mlp-seed-1",
+        "family": "mlp",
+        "seed": 1,
+        "selected_epoch": 16,
+        "best_validation": 0.1409399998106065,
+        "checkpoint_sha256": "6026ea366d0b86e8c94894b20984094a061327e5dc0dd14d41d6b163bf589d43",
+        "elapsed_seconds": 13.087550800060853
+      },
+      {
+        "id": "mlp-seed-2",
+        "family": "mlp",
+        "seed": 2,
+        "selected_epoch": 24,
+        "best_validation": 0.14026166224144107,
+        "checkpoint_sha256": "2d6f02f72c04b0320cec0518282d6fb07c7d1fa1ee9d0735602a9da369862abf",
+        "elapsed_seconds": 11.364441699930467
+      },
+      {
+        "id": "mlp-seed-3",
+        "family": "mlp",
+        "seed": 3,
+        "selected_epoch": 20,
+        "best_validation": 0.14345955321671172,
+        "checkpoint_sha256": "109459342d9400b42e4c540b3000be69177c739305ac586fa4e6f18a30d60475",
+        "elapsed_seconds": 13.487623099936172
+      },
+      {
+        "id": "mlp-seed-4",
+        "family": "mlp",
+        "seed": 4,
+        "selected_epoch": 22,
+        "best_validation": 0.14408675986831845,
+        "checkpoint_sha256": "a4f66ea0b85a1284de9cebc363ac8dfb48a534d99c4e1ad213894b574703899d",
+        "elapsed_seconds": 13.343907400034368
+      },
+      {
+        "id": "mlp-seed-5",
+        "family": "mlp",
+        "seed": 5,
+        "selected_epoch": 12,
+        "best_validation": 0.14172763799101568,
+        "checkpoint_sha256": "b49a98e43be054d8c9d07c388b6d24a5fb1d881d33a6e2320b0adfe8cf9603a3",
+        "elapsed_seconds": 13.735280200024135
+      },
+      {
+        "id": "gru-seed-1",
+        "family": "gru",
+        "seed": 1,
+        "selected_epoch": 25,
+        "best_validation": 0.13943912622261695,
+        "checkpoint_sha256": "5776bfb0ce908126a6e384c0e81d19aa7bae2d92723635a377e2ae6e12fc3fae",
+        "elapsed_seconds": 21.95099499996286
+      },
+      {
+        "id": "gru-seed-2",
+        "family": "gru",
+        "seed": 2,
+        "selected_epoch": 34,
+        "best_validation": 0.13441954429919992,
+        "checkpoint_sha256": "9b603039fc0e4b84b469a61b1834b2b782d10bb7b634c0b38d5685327d77e68a",
+        "elapsed_seconds": 21.95954030007124
+      },
+      {
+        "id": "gru-seed-3",
+        "family": "gru",
+        "seed": 3,
+        "selected_epoch": 27,
+        "best_validation": 0.1381130940403716,
+        "checkpoint_sha256": "e7a8e816c86151917a6c85a6f769f9d29e4502a916e8fac67440fb126ae56792",
+        "elapsed_seconds": 22.179932400002144
+      },
+      {
+        "id": "gru-seed-4",
+        "family": "gru",
+        "seed": 4,
+        "selected_epoch": 32,
+        "best_validation": 0.13891437181539137,
+        "checkpoint_sha256": "b3908fc2658bde6a72b9ec8b49a644d10efea2560b2d1a8db563e3b6c496e5d8",
+        "elapsed_seconds": 22.698829900007695
+      },
+      {
+        "id": "gru-seed-5",
+        "family": "gru",
+        "seed": 5,
+        "selected_epoch": 32,
+        "best_validation": 0.13656163846209385,
+        "checkpoint_sha256": "b797d453671599d2b75aef7f5ea3d56e08139b7984ae199ce24851dcfd306be1",
+        "elapsed_seconds": 21.29749379993882
+      },
+      {
+        "id": "transformer-seed-1",
+        "family": "transformer",
+        "seed": 1,
+        "selected_epoch": 18,
+        "best_validation": 0.14255704075950798,
+        "checkpoint_sha256": "125494c6b025fb420c2a1e3ee9d62e37ca1268f069da50a1c46d810c1fdf044e",
+        "elapsed_seconds": 112.15488009992987
+      },
+      {
+        "id": "transformer-seed-2",
+        "family": "transformer",
+        "seed": 2,
+        "selected_epoch": 17,
+        "best_validation": 0.14014889909538006,
+        "checkpoint_sha256": "e97f8ad182d17245cecf64a4b59abd5aa85471d0656dc147705b72d2c6e78678",
+        "elapsed_seconds": 110.33422399999108
+      },
+      {
+        "id": "transformer-seed-3",
+        "family": "transformer",
+        "seed": 3,
+        "selected_epoch": 14,
+        "best_validation": 0.14080119260217522,
+        "checkpoint_sha256": "4a0593b6b16a829fa2d4af318cb3dcf7e79ea0bdc8fad1392634aff2fe4c8508",
+        "elapsed_seconds": 89.89045669999905
+      },
+      {
+        "id": "transformer-seed-4",
+        "family": "transformer",
+        "seed": 4,
+        "selected_epoch": 15,
+        "best_validation": 0.1425615161939741,
+        "checkpoint_sha256": "acff90789a0ef4bae759d5418406a56a81b69b484d7057fbbc39b3d4cbe805df",
+        "elapsed_seconds": 103.11626609996893
+      },
+      {
+        "id": "transformer-seed-5",
+        "family": "transformer",
+        "seed": 5,
+        "selected_epoch": 9,
+        "best_validation": 0.1428914826760634,
+        "checkpoint_sha256": "20f55a53d4fecc5b7b7b41438fa022b6b1e417a4a061508291849d5259e23adc",
+        "elapsed_seconds": 131.6197066999739
+      }
+    ]
+  },
+  "summary_sha256": {
+    "release-counterfactual.csv": "2d3d8f0b61850e8a9967b971baa960d1b380b1dd6a7d156fe0cf59a968fd4531",
+    "release-seeds.csv": "1de7aa48825724cf4224876e84f28b059f75c38e09ac12f4a56328108df02743"
+  }
+}
