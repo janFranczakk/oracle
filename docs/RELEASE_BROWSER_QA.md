@@ -3,7 +3,8 @@
 Production Vite preview 4181, real backend 8011, Windows desktop in-app Chromium.
 Checks at 1440×900 and 1920×1080 after targeted refactoring. Screenshots show real
 observed/learned/measured data. Some panels are scrolled to the verified measurement;
-internal scrolling is intentional. Candidate badges remain 0.8.0 pending hosted CI.
+internal scrolling is intentional. The original regression captures retain candidate
+0.8.0 badges; Family comparison was recaptured at 1.0.0 after all candidate CI jobs passed.
 
 | Workspace | Exercised behavior | 1440×900 | 1920×1080 |
 | --- | --- | --- | --- |
@@ -26,4 +27,5 @@ The final candidate refresh was also checked at both sizes: small nonzero seed
 variation stays visible, CI assumptions/interpretation precede the detailed metric
 table, and About describes all eight stages and uncalibrated uncertainty. About fits
 both viewports; Escape closes it and restores focus to its launcher. No console
-warning/error was captured during this refresh.
+warning/error was captured during this refresh. The final production build displays
+1.0.0 with an active engine and the same verified fifteen-run report at both sizes.

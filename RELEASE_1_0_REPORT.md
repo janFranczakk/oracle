@@ -26,8 +26,8 @@ Line counts describe scope, not a quality score:
 
 | Coordinator | Before / after lines | Extracted responsibility |
 | --- | ---: | --- |
-| App.tsx | 951 / 707 | Dialog UI and focus lifecycle |
-| counterfactual/CounterfactualLab.tsx | 961 / 834 | Branch tree, provenance, serial tasks and saved-plan lifecycle |
+| App.tsx | 951 / 708 | Dialog UI and focus lifecycle |
+| counterfactual/CounterfactualLab.tsx | 961 / 835 | Branch tree, provenance, serial tasks and saved-plan lifecycle |
 | research/DatasetExplorer.tsx | 779 / 510 | Recorded episode observation and distribution charts |
 | research/TrainingDashboard.tsx | 718 / 493 | Held-out evaluation and chart theme |
 | rendering/WorldViewport.tsx | 606 / 536 | Cached forecast drawing layer |
@@ -186,9 +186,10 @@ measurements, ranking and old trajectories, and disabled reality until a matchin
 
 ## Testing
 
-Local full backend: **184 passed**, including real tiny training/benchmark/seed studies,
+Local full backend: **185 passed**, including release metadata/OpenAPI consistency,
+real tiny training/benchmark/seed studies,
 artifact protection, deterministic provenance, missing metrics, isolation and existing
-Stages 1–8 regression tests. Ruff check, Ruff format (86 files), `pip check` pass.
+Stages 1–8 regression tests. Ruff check, Ruff format (87 files), `pip check` pass.
 One existing Starlette/httpx deprecation warning remains visible; no failing test is hidden.
 Frontend: frozen lockfile install, **89 Vitest tests**, ESLint, Prettier, strict app
 TypeScript, strict E2E TypeScript and production Vite build pass.
@@ -205,8 +206,11 @@ The workflow retains Backend (ubuntu-latest), Backend (windows-latest), Frontend
 adds a separate **Browser E2E** job. Locked dependencies, pinned Actions and read-only
 repository permissions remain. CI uses tiny real fixtures; it does not run the full
 five-seed study or 432-combination benchmark. Failed E2E retains traces/screenshots/HTML
-for seven days. Hosted results are pending on the release PR; local green gates alone
-do not authorize the 1.0.0 version change. This section will be completed after CI.
+for seven days. All four hosted jobs passed on candidate revision `c3cd483` in
+[CI run 37653244527](https://github.com/janFranczakk/oracle/actions/runs/37653244527)
+before version promotion. Backend package/API and frontend package/UI now identify
+1.0.0. The release PR retains the same four required CI gates after this promotion;
+current revision results are recorded on [PR #8](https://github.com/janFranczakk/oracle/pull/8).
 
 ## E2E
 
@@ -214,7 +218,7 @@ Five Chromium smoke flows use the actual API, Pymunk and a deterministic trained
 Main Lab connection/pause/step/select/edit; separate learned/reference forecast;
 source capture/mass branch/save/live-world preservation; real Research routes;
 nine-action planning with stale evidence removed after goal edits. No model output is
-mocked. Latest full release-candidate run: **5 passed, 13.8 s**. One worker, retry only in CI;
+mocked. Latest full 1.0.0 run: **5 passed, 13.0 s**. One worker, retry only in CI;
 owned backend 8012/preview 4182, isolated `.run/e2e` artifact root, no reuse of user servers.
 [Local commands and fixture contract](docs/DEMO_AND_E2E.md).
 
@@ -223,8 +227,8 @@ owned backend 8012/preview 4182, isolated `.run/e2e` artifact root, no reuse of 
 Measured Windows Python 3.12.14 / Torch 2.14.1+cpu / NumPy 2.5.2: full intervention
 suite 121.3 s; fifteen seed runs 722.4 s; six-run CLI seed smoke 2.3 s. These timings
 include real replay/training/evaluation/report work and are local observations,
-not portable speed guarantees. Latest Vite build: 5.77 s; largest JavaScript chunks
-index 360.70 kB (gzip 112.71), lazy LineChart 360.75 kB (gzip 105.57), lazy Research
+not portable speed guarantees. Latest Vite build: 5.37 s; largest JavaScript chunks
+index 360.71 kB (gzip 112.71), lazy LineChart 360.75 kB (gzip 105.57), lazy Research
 66.26 kB (gzip 19.35). Research remains lazy and no chunk warning occurred. No new
 browser FPS, mobile, memory soak or CUDA performance claim is made.
 
@@ -277,8 +281,9 @@ as a release asset. Prediction, Counterfactual and Planning use real demo weight
 ## Final Status
 
 The requested implementation, real studies, protected demo, targeted refactor and local
-automated/manual regression gates are complete. Hosted CI and conditional 1.0.0 version
-promotion are pending. The project is a functional, honestly evaluated portfolio candidate:
+automated/manual regression gates are complete. All four hosted candidate CI jobs passed
+before promotion to 1.0.0. Version gates and review evidence are linked through PR #8.
+The project is ready as a functional, reproducible and honestly evaluated portfolio project:
 it predicts short controlled trajectories, measures intervention errors and compares seeds;
 multi-metre long forecasts, uncertain contacts, uncalibrated uncertainty and bounded planning
 prevent claims of reliable general physics, causal understanding or global goal solving.

@@ -10,8 +10,8 @@
 | Planning | Nine velocity actions are ranked by predicted distance to a goal; the fixed winner is verified in reality. |
 
 Stages 1–8 are implemented. **FINAL VALIDATION & RELEASE** adds intervention benchmarks,
-repeated training seeds, real browser E2E and a protected demo. The release candidate
-awaits hosted CI before promotion from 0.8.0 to 1.0.0. Counterfactual conditioning does
+repeated training seeds, real browser E2E and a protected demo. **Version 1.0.0** was
+promoted after all four hosted CI jobs passed. Counterfactual conditioning does
 not establish causal understanding; planning is bounded search; MC-dropout remains **uncalibrated**.
 
 ## Quick Start — Fast Demo
