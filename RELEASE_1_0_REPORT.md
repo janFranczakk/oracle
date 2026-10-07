@@ -212,6 +212,13 @@ before version promotion. Backend package/API and frontend package/UI now identi
 1.0.0. The release PR retains the same four required CI gates after this promotion;
 current revision results are recorded on [PR #8](https://github.com/janFranczakk/oracle/pull/8).
 
+Delivery status on 2026-10-07: GitHub repeatedly rejected the final 1.0.0 push
+with server-side HTTP 500. The remote PR remains a draft on `c3cd483`; the version
+promotion and final local validation commits are preserved on `release/oracle-1.0`.
+Final-version hosted CI has not run yet. Complete an ordinary push and verify all
+four jobs before marking the PR ready. The successful candidate CI is not presented
+as CI for the still-local 1.0.0 revision.
+
 ## E2E
 
 Five Chromium smoke flows use the actual API, Pymunk and a deterministic trained GRU:
@@ -282,8 +289,9 @@ as a release asset. Prediction, Counterfactual and Planning use real demo weight
 
 The requested implementation, real studies, protected demo, targeted refactor and local
 automated/manual regression gates are complete. All four hosted candidate CI jobs passed
-before promotion to 1.0.0. Version gates and review evidence are linked through PR #8.
-The project is ready as a functional, reproducible and honestly evaluated portfolio project:
+before local promotion to 1.0.0. Remote delivery and final-version hosted CI remain
+pending because GitHub rejects writes with HTTP 500; PR #8 remains a draft.
+The implementation is ready locally as a functional, reproducible and honestly evaluated portfolio project:
 it predicts short controlled trajectories, measures intervention errors and compares seeds;
 multi-metre long forecasts, uncertain contacts, uncalibrated uncertainty and bounded planning
 prevent claims of reliable general physics, causal understanding or global goal solving.
